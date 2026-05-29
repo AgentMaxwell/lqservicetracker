@@ -8,6 +8,7 @@
         /* Tablet-Optimized CSS */
         :root {
             --primary: #005A9C;
+            --secondary: #6c757d;
             --success: #28a745;
             --danger: #dc3545;
             --bg-color: #f4f7f6;
@@ -28,19 +29,39 @@
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
-        h1 { text-align: center; color: var(--primary); }
+        h1, h2 { text-align: center; color: var(--primary); margin-top: 0;}
         
         /* Form Elements */
         label { font-weight: bold; display: block; margin-bottom: 8px; font-size: 1.2rem;}
-        select, button {
+        select, input, button {
             width: 100%;
             padding: 15px;
-            font-size: 1.2rem; /* Large text for tablets */
+            font-size: 1.2rem;
             border-radius: 8px;
             border: 1px solid #ccc;
             margin-bottom: 20px;
             box-sizing: border-box;
         }
+        .btn-primary { background-color: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer;}
+        .btn-primary:active { background-color: #004080; }
+        .btn-outline { background-color: transparent; color: var(--primary); border: 2px solid var(--primary); font-weight: bold; cursor: pointer;}
+        
+        /* Admin / Site Management */
+        #adminSection { background: #e9ecef; padding: 20px; border-radius: 8px; margin-bottom: 20px; display: none; }
+        
+        /* Navigation Controls */
+        .nav-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #eef2f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .nav-controls button { width: auto; margin: 0; padding: 15px 30px; }
+        .nav-status { text-align: center; font-size: 1.4rem; font-weight: bold; }
+        .save-indicator { font-size: 0.9rem; color: var(--secondary); display: block; margin-top: 5px; font-weight: normal;}
         
         /* Gear Parts Checklist */
         .part-section {
@@ -50,62 +71,22 @@
             margin-bottom: 15px;
             background: #fafafa;
         }
-        .part-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 1.3rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        .button-group {
-            display: flex;
-            gap: 10px;
-        }
+        .part-header { font-size: 1.3rem; font-weight: bold; margin-bottom: 10px; }
+        .button-group { display: flex; gap: 10px; }
         .btn-good, .btn-issue {
-            flex: 1;
-            padding: 15px;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            transition: opacity 0.2s;
+            flex: 1; padding: 15px; color: white; border: none; cursor: pointer; font-weight: bold; transition: opacity 0.2s; border-radius: 8px;
         }
-        .btn-good { background-color: #6c757d; }
+        .btn-good { background-color: var(--secondary); }
         .btn-good.active { background-color: var(--success); }
-        .btn-issue { background-color: #6c757d; }
+        .btn-issue { background-color: var(--secondary); }
         .btn-issue.active { background-color: var(--danger); }
         
         /* Notes Area */
-        .notes-area {
-            display: none; /* Hidden by default */
-            margin-top: 15px;
-        }
+        .notes-area { display: none; margin-top: 15px; }
         .notes-area.visible { display: block; }
         textarea {
-            width: 100%;
-            height: 100px;
-            padding: 12px;
-            font-size: 1.1rem;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            resize: vertical;
-            box-sizing: border-box;
+            width: 100%; height: 100px; padding: 12px; font-size: 1.1rem; border-radius: 8px; border: 1px solid #ccc; resize: vertical; box-sizing: border-box;
         }
-        
-        /* Submit Button */
-        .submit-btn {
-            background-color: var(--primary);
-            color: white;
-            font-size: 1.4rem;
-            font-weight: bold;
-            border: none;
-            margin-top: 20px;
-            cursor: pointer;
-        }
-        .submit-btn:active { background-color: #004080; }
-        
-        #status-msg { text-align: center; font-size: 1.2rem; font-weight: bold; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -113,217 +94,273 @@
 <div class="container">
     <h1>Gear Service Tracker</h1>
 
-    <label for="siteSelect">Select Site:</label>
-    <select id="siteSelect">
-        <option value="">-- Choose Site --</option>
-        <option value="Site Alpha">Site Alpha (10 Gears)</option>
-        <option value="Site Bravo">Site Bravo (15 Gears)</option>
-        <option value="Site Charlie">Site Charlie (5 Gears)</option>
-    </select>
-
-    <label for="gearSelect">Select Gear ID:</label>
-    <select id="gearSelect" disabled>
-        <option value="">-- Choose Site First --</option>
-    </select>
-
-    <div id="serviceForm" style="display: none;">
-        <h3>Service Checklist</h3>
+    <div id="setupSection">
+        <label for="siteSelect">Select Site:</label>
+        <select id="siteSelect">
+            <option value="">Loading sites...</option>
+        </select>
         
+        <button class="btn-outline" id="toggleAdminBtn">+ Manage Sites</button>
+    </div>
+
+    <div id="adminSection">
+        <h2>Add New Site</h2>
+        <label>Site Name:</label>
+        <input type="text" id="newSiteName" placeholder="e.g. Site Delta">
+        <label>Number of Gears:</label>
+        <input type="number" id="newSiteCount" placeholder="e.g. 12">
+        <button class="btn-primary" id="saveSiteBtn">Save Site to Cloud</button>
+    </div>
+
+    <div id="serviceSection" style="display: none;">
+        
+        <div class="nav-controls">
+            <button class="btn-primary" id="prevBtn" disabled>&laquo; Back</button>
+            <div class="nav-status">
+                <div id="gearCounter">Gear 1 of X</div>
+                <div class="save-indicator" id="saveIndicator">Cloud Synced ✓</div>
+            </div>
+            <button class="btn-primary" id="nextBtn">Next &raquo;</button>
+        </div>
+
         <div id="partsContainer"></div>
 
-        <button class="submit-btn" id="submitService">Submit Service Record</button>
-        <div id="status-msg"></div>
     </div>
 </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    // 1. Import your database connection from your new file
+    import { db } from './firebase-config.js';
+    
+    // 2. Import ONLY the Firestore functions you need (no initializeApp needed here anymore)
+    import { collection, addDoc, setDoc, getDocs, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // 🔴 REPLACE THIS with your Firebase Config from Step 1
-  const firebaseConfig = {
-    apiKey: "AIzaSyDvtVFsGd37aAWNoLSgAQWxhVa7-gNc1Y8",
-    authDomain: "lqservicetracker.firebaseapp.com",
-    databaseURL: "https://lqservicetracker-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "lqservicetracker",
-    storageBucket: "lqservicetracker.firebasestorage.app",
-    messagingSenderId: "716349093814",
-    appId: "1:716349093814:web:f01b3f17da7c8d0a2f7317",
-    measurementId: "G-DZNMPDJ91K"
-  };
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    // Gear Configuration
-    const siteConfig = {
-        "Site Alpha": 10,
-        "Site Bravo": 15,
-        "Site Charlie": 5
-    };
+    // --- App State ---
+    let sitesData = {}; 
+    let currentSiteName = "";
+    let totalGears = 0;
+    let currentGearIndex = 1;
+    let gearDataCache = {}; // Stores session data locally before/after sync
+    let isDirty = false;    // Tracks if changes were made that need saving
     const partsList = ["Right Shoulder", "Left Shoulder", "Front", "Back", "Gun"];
-    let currentServiceData = {};
 
     // DOM Elements
     const siteSelect = document.getElementById('siteSelect');
-    const gearSelect = document.getElementById('gearSelect');
-    const serviceForm = document.getElementById('serviceForm');
+    const toggleAdminBtn = document.getElementById('toggleAdminBtn');
+    const adminSection = document.getElementById('adminSection');
+    const saveSiteBtn = document.getElementById('saveSiteBtn');
+    const setupSection = document.getElementById('setupSection');
+    const serviceSection = document.getElementById('serviceSection');
+    
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const gearCounter = document.getElementById('gearCounter');
+    const saveIndicator = document.getElementById('saveIndicator');
     const partsContainer = document.getElementById('partsContainer');
-    const submitBtn = document.getElementById('submitService');
-    const statusMsg = document.getElementById('status-msg');
 
-    // Handle Site Selection
+    // --- 1. INITIALIZATION & SITES MANAGEMENT ---
+
+    async function loadSites() {
+        siteSelect.innerHTML = '<option value="">-- Choose Site --</option>';
+        try {
+            const querySnapshot = await getDocs(collection(db, "sites"));
+            sitesData = {};
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                sitesData[data.name] = data.gearCount;
+                siteSelect.innerHTML += `<option value="${data.name}">${data.name} (${data.gearCount} Gears)</option>`;
+            });
+        } catch (error) {
+            console.error("Error loading sites: ", error);
+            siteSelect.innerHTML = '<option value="">Error loading sites. Check console.</option>';
+        }
+    }
+
+    toggleAdminBtn.addEventListener('click', () => {
+        adminSection.style.display = adminSection.style.display === 'none' || adminSection.style.display === '' ? 'block' : 'none';
+    });
+
+    saveSiteBtn.addEventListener('click', async () => {
+        const name = document.getElementById('newSiteName').value.trim();
+        const count = parseInt(document.getElementById('newSiteCount').value);
+        if (!name || isNaN(count) || count <= 0) return alert("Please enter a valid name and gear count.");
+        
+        saveSiteBtn.innerText = "Saving...";
+        try {
+            await addDoc(collection(db, "sites"), { name: name, gearCount: count });
+            document.getElementById('newSiteName').value = "";
+            document.getElementById('newSiteCount').value = "";
+            adminSection.style.display = 'none';
+            saveSiteBtn.innerText = "Save Site to Cloud";
+            await loadSites(); // Refresh dropdown
+        } catch (error) {
+            console.error("Error saving site:", error);
+            alert("Failed to save site.");
+        }
+    });
+
+    // --- 2. STARTING A SERVICE SESSION ---
+
     siteSelect.addEventListener('change', (e) => {
-        const site = e.target.value;
-        gearSelect.innerHTML = '<option value="">-- Choose Gear --</option>';
-        if (site) {
-            gearSelect.disabled = false;
-            const gearCount = siteConfig[site];
-            for (let i = 1; i <= gearCount; i++) {
-                gearSelect.innerHTML += `<option value="Gear ${i}">Gear #${i}</option>`;
-            }
-        } else {
-            gearSelect.disabled = true;
-            serviceForm.style.display = 'none';
+        currentSiteName = e.target.value;
+        if (currentSiteName) {
+            totalGears = sitesData[currentSiteName];
+            currentGearIndex = 1;
+            gearDataCache = {}; // Reset session memory
+            setupSection.style.display = 'none';
+            serviceSection.style.display = 'block';
+            renderGearUI();
         }
     });
 
-    // Handle Gear Selection
-    gearSelect.addEventListener('change', (e) => {
-        if (e.target.value) {
-            serviceForm.style.display = 'block';
-            renderParts();
-        } else {
-            serviceForm.style.display = 'none';
+    // --- 3. NAVIGATION & AUTO-SAVE LOGIC ---
+
+    async function triggerBackgroundSave() {
+        if (!isDirty) return; // Nothing changed, no need to save
+        
+        const gearToSave = currentGearIndex; 
+        const dataToSave = gearDataCache[gearToSave];
+        isDirty = false; // Reset dirty flag immediately for fast UI
+        saveIndicator.innerText = "Saving to Cloud...";
+        saveIndicator.style.color = "#ffc107"; // Yellow warning color while saving
+
+        try {
+            // Document ID format: SiteName-YYYY-MM-DD-Gear-X
+            // This ensures if you navigate back to a gear on the same day, it overwrites the entry rather than making duplicates.
+            const today = new Date().toISOString().split('T')[0];
+            const safeSiteName = currentSiteName.replace(/\s+/g, '-');
+            const docId = `${safeSiteName}-${today}-Gear-${gearToSave}`;
+
+            await setDoc(doc(db, "services", docId), {
+                site: currentSiteName,
+                gearId: `Gear ${gearToSave}`,
+                serviceDetails: dataToSave,
+                lastUpdated: serverTimestamp()
+            });
+
+            saveIndicator.innerText = "Cloud Synced ✓";
+            saveIndicator.style.color = "var(--success)";
+        } catch (error) {
+            console.error("Auto-save failed: ", error);
+            saveIndicator.innerText = "Sync Failed ✗";
+            saveIndicator.style.color = "var(--danger)";
+            isDirty = true; // Flag as dirty so it tries again later
+        }
+    }
+
+    prevBtn.addEventListener('click', async () => {
+        await triggerBackgroundSave();
+        if (currentGearIndex > 1) {
+            currentGearIndex--;
+            renderGearUI();
         }
     });
 
-    // Render the Parts Checklist
-    function renderParts() {
+    nextBtn.addEventListener('click', async () => {
+        await triggerBackgroundSave();
+        if (currentGearIndex < totalGears) {
+            currentGearIndex++;
+            renderGearUI();
+        } else {
+            alert("You have reached the end of the gears for this site.");
+            // Optional: Redirect back to site selection here
+            // setupSection.style.display = 'block';
+            // serviceSection.style.display = 'none';
+            // siteSelect.value = "";
+        }
+    });
+
+    // --- 4. RENDER GEAR UI ---
+
+    function renderGearUI() {
+        gearCounter.innerText = `Gear ${currentGearIndex} of ${totalGears}`;
+        prevBtn.disabled = currentGearIndex === 1;
+        nextBtn.innerText = currentGearIndex === totalGears ? "Finish" : "Next \u00BB";
+        saveIndicator.innerText = "Cloud Synced ✓";
+        saveIndicator.style.color = "var(--secondary)";
+
+        // Initialize cache for this gear if it doesn't exist
+        if (!gearDataCache[currentGearIndex]) {
+            gearDataCache[currentGearIndex] = {};
+            partsList.forEach(part => {
+                gearDataCache[currentGearIndex][part] = { status: null, notes: "" };
+            });
+        }
+
+        const currentData = gearDataCache[currentGearIndex];
         partsContainer.innerHTML = '';
-        currentServiceData = {}; // Reset data
 
         partsList.forEach(part => {
-            currentServiceData[part] = { status: null, notes: "" }; // Default state
-            
-            // Clean ID for HTML attributes
-            const partId = part.replace(/\s+/g, '-').toLowerCase(); 
+            const partId = part.replace(/\s+/g, '-').toLowerCase();
+            const partData = currentData[part];
             
             const partDiv = document.createElement('div');
             partDiv.className = 'part-section';
             partDiv.innerHTML = `
-                <div class="part-header">
-                    <span>${part}</span>
-                </div>
+                <div class="part-header">${part}</div>
                 <div class="button-group">
-                    <button class="btn-good" data-part="${part}">All Good</button>
-                    <button class="btn-issue" data-part="${part}">Needs Fix</button>
+                    <button class="btn-good ${partData.status === 'Good' ? 'active' : ''}" data-part="${part}">All Good</button>
+                    <button class="btn-issue ${partData.status === 'Issue' ? 'active' : ''}" data-part="${part}">Needs Fix</button>
                 </div>
-                <div class="notes-area" id="notes-${partId}">
+                <div class="notes-area ${partData.status === 'Issue' ? 'visible' : ''}" id="notes-${partId}">
                     <label>What is wrong & what was fixed?</label>
-                    <textarea data-part="${part}" placeholder="Enter details here..."></textarea>
+                    <textarea data-part="${part}" placeholder="Enter details here...">${partData.notes}</textarea>
                 </div>
             `;
             partsContainer.appendChild(partDiv);
         });
 
-        attachButtonListeners();
+        attachInteractionListeners();
     }
 
-    // Attach logic to the "All Good" and "Needs Fix" buttons
-    function attachButtonListeners() {
-        const goodBtns = document.querySelectorAll('.btn-good');
-        const issueBtns = document.querySelectorAll('.btn-issue');
-        const textareas = document.querySelectorAll('textarea');
+    function attachInteractionListeners() {
+        const buttons = partsContainer.querySelectorAll('button');
+        const textareas = partsContainer.querySelectorAll('textarea');
 
-        goodBtns.forEach(btn => {
+        buttons.forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const part = e.target.getAttribute('data-part');
-                const partId = part.replace(/\s+/g, '-').toLowerCase();
-                
-                // UI updates
-                e.target.classList.add('active');
-                e.target.nextElementSibling.classList.remove('active');
-                document.getElementById(`notes-${partId}`).classList.remove('visible');
-                
-                // Data updates
-                currentServiceData[part].status = "Good";
-                currentServiceData[part].notes = "";
-                document.querySelector(`textarea[data-part="${part}"]`).value = "";
-            });
-        });
+                isDirty = true;
+                saveIndicator.innerText = "Unsaved Changes...";
+                saveIndicator.style.color = "var(--secondary)";
 
-        issueBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
                 const part = e.target.getAttribute('data-part');
+                const isGoodBtn = e.target.classList.contains('btn-good');
                 const partId = part.replace(/\s+/g, '-').toLowerCase();
-                
-                // UI updates
+                const notesArea = document.getElementById(`notes-${partId}`);
+                const siblings = e.target.parentElement.querySelectorAll('button');
+
+                // UI Update
+                siblings.forEach(b => b.classList.remove('active'));
                 e.target.classList.add('active');
-                e.target.previousElementSibling.classList.remove('active');
-                document.getElementById(`notes-${partId}`).classList.add('visible');
-                
-                // Data updates
-                currentServiceData[part].status = "Fixed/Issue";
+
+                // State Update
+                if (isGoodBtn) {
+                    notesArea.classList.remove('visible');
+                    gearDataCache[currentGearIndex][part].status = "Good";
+                    gearDataCache[currentGearIndex][part].notes = "";
+                    notesArea.querySelector('textarea').value = "";
+                } else {
+                    notesArea.classList.add('visible');
+                    gearDataCache[currentGearIndex][part].status = "Issue";
+                }
             });
         });
 
         textareas.forEach(ta => {
             ta.addEventListener('input', (e) => {
+                isDirty = true;
+                saveIndicator.innerText = "Unsaved Changes...";
+                saveIndicator.style.color = "var(--secondary)";
+                
                 const part = e.target.getAttribute('data-part');
-                currentServiceData[part].notes = e.target.value;
+                gearDataCache[currentGearIndex][part].notes = e.target.value;
             });
         });
     }
 
-    // Submit to Google Firestore Database
-    submitBtn.addEventListener('click', async () => {
-        const site = siteSelect.value;
-        const gear = gearSelect.value;
+    // Initialize App
+    loadSites();
 
-        // Validation: Ensure all parts were checked
-        const unchecked = Object.values(currentServiceData).some(part => part.status === null);
-        if (unchecked) {
-            alert("Please mark the status for all gear parts before submitting.");
-            return;
-        }
-
-        submitBtn.disabled = true;
-        submitBtn.innerText = "Saving to Cloud...";
-        statusMsg.innerText = "";
-
-        try {
-            // Write data to the 'services' collection in Firestore
-            await addDoc(collection(db, "services"), {
-                site: site,
-                gearId: gear,
-                serviceDetails: currentServiceData,
-                timestamp: serverTimestamp()
-            });
-
-            statusMsg.style.color = "green";
-            statusMsg.innerText = "Service record saved successfully!";
-            
-            // Reset form
-            setTimeout(() => {
-                siteSelect.value = "";
-                gearSelect.innerHTML = '<option value="">-- Choose Site First --</option>';
-                gearSelect.disabled = true;
-                serviceForm.style.display = 'none';
-                submitBtn.disabled = false;
-                submitBtn.innerText = "Submit Service Record";
-                statusMsg.innerText = "";
-            }, 2000);
-
-        } catch (error) {
-            console.error("Error adding document: ", error);
-            statusMsg.style.color = "red";
-            statusMsg.innerText = "Error saving data. Check console.";
-            submitBtn.disabled = false;
-            submitBtn.innerText = "Submit Service Record";
-        }
-    });
 </script>
 
 </body>
