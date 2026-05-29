@@ -573,7 +573,9 @@
                         html += `<div class="print-pack-title">Pack ${i}</div>`;
                         html += `<ul class="print-issue-list">`;
                         issues.forEach(part => {
-                            const noteText = parts[part].notes ? ` - <em>${parts[part].notes}</em>` : "";                        });
+                            const noteText = parts[part].notes ? ` - <em>${parts[part].notes}</em>` : "";
+                            html += `<li><strong>${part}:</strong> ${noteText}</li>`;
+                        });
                         html += `</ul></div>`;
                     }
                 }
