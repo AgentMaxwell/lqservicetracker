@@ -58,11 +58,11 @@
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
-        h1, h2 { text-align: center; color: var(--primary); margin-top: 0;}
+        h1, h2, h3 { text-align: center; color: var(--primary); margin-top: 0;}
         
         /* Form Elements */
         label { font-weight: bold; display: block; margin-bottom: 8px; font-size: 1.2rem;}
-        select, input, button:not(.top-nav button) {
+        select, input, button:not(.top-nav button):not(.admin-btn) {
             width: 100%; padding: 15px; font-size: 1.2rem; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 20px; box-sizing: border-box;
         }
         .btn-primary { background-color: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer;}
@@ -70,13 +70,24 @@
         .btn-outline { background-color: transparent; color: var(--primary); border: 2px solid var(--primary); font-weight: bold; cursor: pointer;}
         .btn-secondary { background-color: var(--secondary); color: white; border: none; font-weight: bold; cursor: pointer;}
         .btn-secondary:active { background-color: #5a6268; }
+        .btn-danger { background-color: var(--danger); color: white; border: none; font-weight: bold; cursor: pointer;}
         
         /* Sections */
         .app-section { display: none; }
         .app-section.active { display: block; }
-        #adminSection { background: #e9ecef; padding: 20px; border-radius: 8px; margin-bottom: 20px; display: none; }
         .action-group { display: flex; gap: 10px; }
         
+        /* Admin Management List */
+        .site-manager-item {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #f9f9f9; border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 10px;
+        }
+        .site-manager-item strong { font-size: 1.2rem; }
+        .admin-controls { display: flex; gap: 10px; }
+        .admin-btn { padding: 10px 15px; font-size: 1rem; border-radius: 6px; cursor: pointer; border: none; color: white;}
+        .btn-edit { background-color: #ffc107; color: #333; font-weight: bold;}
+        .btn-del { background-color: var(--danger); font-weight: bold;}
+
         /* Navigation Controls */
         .nav-controls {
             display: flex; justify-content: space-between; align-items: center; background: #eef2f5; padding: 15px; border-radius: 8px; margin-bottom: 20px;
@@ -115,16 +126,7 @@
         @media print {
             body * { visibility: hidden; }
             #printOnlyArea, #printOnlyArea * { visibility: visible; }
-            #printOnlyArea {
-                display: block;
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                padding: 20px;
-                color: black;
-                font-family: sans-serif;
-            }
+            #printOnlyArea { display: block; position: absolute; left: 0; top: 0; width: 100%; padding: 20px; color: black; font-family: sans-serif; }
             .print-header { border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
             .print-pack-block { border-bottom: 1px solid #ccc; padding-bottom: 15px; margin-bottom: 15px; }
             .print-pack-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
@@ -156,22 +158,30 @@
                 <button class="btn-primary" id="startNewServiceBtn">Start New Service</button>
                 <button class="btn-secondary" id="loadPrevServiceBtn">Load Previous Service</button>
             </div>
-            <div id="loadStatusMsg" style="text-align: center; font-weight: bold;"></div>
+            <div id="loadStatusMsg" style="text-align: center; font-weight: bold; margin-top: 10px;"></div>
         </div>
 
         <div class="action-group" id="mainActionGroup">
-            <button class="btn-outline" id="toggleAdminBtn">+ Manage Sites</button>
+            <button class="btn-outline" id="toggleAdminBtn">⚙️ Manage Sites</button>
             <button class="btn-outline" id="viewReportsBtn">📊 View Full Grid Report</button>
         </div>
     </div>
 
-    <div id="adminSection">
-        <h2>Add New Site</h2>
+    <div id="adminSection" class="app-section">
+        <h2>Manage Sites Database</h2>
+        
+        <div id="adminSiteList" style="margin-bottom: 30px;">
+            <p>Loading sites...</p>
+        </div>
+
+        <hr style="border: 1px solid #eee; margin-bottom: 20px;">
+        
+        <h3>Add New Site</h3>
         <label>Site Name:</label>
         <input type="text" id="newSiteName" placeholder="e.g. Site Delta">
-        <label>Number of packs:</label>
+        <label>Number of Packs:</label>
         <input type="number" id="newSiteCount" placeholder="e.g. 12">
-        <button class="btn-primary" id="saveSiteBtn">Save Site to Cloud</button>
+        <button class="btn-primary" id="saveSiteBtn">Save New Site</button>
     </div>
 
     <div id="siteNotesSection" class="app-section">
@@ -215,7 +225,7 @@
         <div class="nav-controls">
             <button class="btn-primary" id="prevBtn" disabled>&laquo; Back</button>
             <div class="nav-status">
-                <div id="packCounter">pack 1 of X</div>
+                <div id="packCounter">Pack 1 of X</div>
                 <div class="save-indicator" id="saveIndicator">Cloud Synced ✓</div>
             </div>
             <button class="btn-primary" id="nextBtn">Next &raquo;</button>
@@ -228,10 +238,11 @@
 
 <script type="module">
     import { db } from './firebase-config.js';
-    import { collection, addDoc, setDoc, getDoc, getDocs, doc, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    // Added updateDoc and deleteDoc for full management
+    import { collection, addDoc, setDoc, getDoc, getDocs, doc, updateDoc, deleteDoc, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     // App State
-    let sitesData = {}; 
+    let sitesData = {}; // Format: { "Site Name": { id: "doc_id", count: 10 } }
     let currentSiteName = "";
     let totalpacks = 0;
     let currentpackIndex = 1;
@@ -256,17 +267,18 @@
         document.getElementById(sectionId).classList.add('active');
         if (clickedBtnId) document.getElementById(clickedBtnId).classList.add('active');
         
-        document.getElementById('adminSection').style.display = 'none';
-        
         // Reset Setup UI
         document.getElementById('siteSelect').value = "";
         serviceTypeSelection.style.display = 'none';
+        
+        if(sectionId === 'adminSection') renderAdminList();
     }
 
     document.getElementById('navHome').addEventListener('click', () => navigateTo('setupSection', 'navHome'));
     document.getElementById('navSiteNotes').addEventListener('click', () => navigateTo('siteNotesSection', 'navSiteNotes'));
     document.getElementById('navPrintReport').addEventListener('click', () => navigateTo('printReportSection', 'navPrintReport'));
     document.getElementById('viewReportsBtn').addEventListener('click', () => navigateTo('reportSection', null));
+    document.getElementById('toggleAdminBtn').addEventListener('click', () => navigateTo('adminSection', null));
 
     // --- 1. INITIALIZATION & SITES MANAGEMENT ---
     async function loadSites() {
@@ -278,9 +290,13 @@
             sitesData = {};
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
-                sitesData[data.name] = data.packCount;
+                const count = data.packCount || data.gearCount || 0; // backwards compatibility
+                
+                // Store the document ID so we can edit/delete it later
+                sitesData[data.name] = { id: doc.id, count: count };
+                
                 selects.forEach(id => {
-                    document.getElementById(id).innerHTML += `<option value="${data.name}">${data.name} (${data.packCount} packs)</option>`;
+                    document.getElementById(id).innerHTML += `<option value="${data.name}">${data.name} (${count} Packs)</option>`;
                 });
             });
         } catch (error) {
@@ -288,10 +304,89 @@
         }
     }
 
-    document.getElementById('toggleAdminBtn').addEventListener('click', () => {
-        const admin = document.getElementById('adminSection');
-        admin.style.display = admin.style.display === 'none' || admin.style.display === '' ? 'block' : 'none';
-    });
+    // --- 2. ADMIN CRUD LOGIC ---
+    function renderAdminList() {
+        const listDiv = document.getElementById('adminSiteList');
+        listDiv.innerHTML = '';
+
+        if (Object.keys(sitesData).length === 0) {
+            listDiv.innerHTML = '<p>No sites found. Add one below!</p>';
+            return;
+        }
+
+        Object.keys(sitesData).forEach(siteName => {
+            const siteInfo = sitesData[siteName];
+            
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'site-manager-item';
+            itemDiv.innerHTML = `
+                <div>
+                    <strong>${siteName}</strong><br>
+                    <span style="color: #666;">${siteInfo.count} Packs</span>
+                </div>
+                <div class="admin-controls">
+                    <button class="admin-btn btn-edit" data-id="${siteInfo.id}" data-name="${siteName}" data-count="${siteInfo.count}">Edit</button>
+                    <button class="admin-btn btn-del" data-id="${siteInfo.id}" data-name="${siteName}">Delete</button>
+                </div>
+            `;
+            listDiv.appendChild(itemDiv);
+        });
+
+        // Attach listeners to new Edit/Delete buttons
+        document.querySelectorAll('.btn-edit').forEach(btn => {
+            btn.addEventListener('click', handleEditSite);
+        });
+        document.querySelectorAll('.btn-del').forEach(btn => {
+            btn.addEventListener('click', handleDeleteSite);
+        });
+    }
+
+    async function handleEditSite(e) {
+        const docId = e.target.getAttribute('data-id');
+        const oldName = e.target.getAttribute('data-name');
+        const oldCount = e.target.getAttribute('data-count');
+
+        const newName = prompt("Edit Site Name:", oldName);
+        if (newName === null) return; // Cancelled
+        
+        const newCountStr = prompt("Edit Pack Count:", oldCount);
+        if (newCountStr === null) return; // Cancelled
+        
+        const newCount = parseInt(newCountStr);
+        if (!newName.trim() || isNaN(newCount) || newCount <= 0) {
+            return alert("Invalid name or count provided.");
+        }
+
+        try {
+            e.target.innerText = "...";
+            await updateDoc(doc(db, "sites", docId), {
+                name: newName.trim(),
+                packCount: newCount
+            });
+            await loadSites();
+            renderAdminList();
+        } catch (error) {
+            console.error(error);
+            alert("Error updating site.");
+        }
+    }
+
+    async function handleDeleteSite(e) {
+        const docId = e.target.getAttribute('data-id');
+        const siteName = e.target.getAttribute('data-name');
+
+        if(confirm(`Are you sure you want to permanently delete "${siteName}"? This will hide it from the dropdown menus.`)) {
+            try {
+                e.target.innerText = "...";
+                await deleteDoc(doc(db, "sites", docId));
+                await loadSites();
+                renderAdminList();
+            } catch (error) {
+                console.error(error);
+                alert("Error deleting site.");
+            }
+        }
+    }
 
     document.getElementById('saveSiteBtn').addEventListener('click', async () => {
         const name = document.getElementById('newSiteName').value.trim();
@@ -304,20 +399,20 @@
             await addDoc(collection(db, "sites"), { name: name, packCount: count });
             document.getElementById('newSiteName').value = "";
             document.getElementById('newSiteCount').value = "";
-            document.getElementById('adminSection').style.display = 'none';
-            btn.innerText = "Save Site to Cloud";
+            btn.innerText = "Save New Site";
             await loadSites(); 
+            renderAdminList(); // Refresh the list UI
         } catch (error) {
             console.error("Error saving site:", error);
             alert("Failed to save site.");
         }
     });
 
-    // --- 2. START / LOAD SERVICE FLOW ---
+    // --- 3. START / LOAD SERVICE FLOW ---
     document.getElementById('siteSelect').addEventListener('change', (e) => {
         currentSiteName = e.target.value;
         if (currentSiteName) {
-            totalpacks = sitesData[currentSiteName];
+            totalpacks = sitesData[currentSiteName].count;
             serviceTypeSelection.style.display = 'block';
             document.getElementById('loadStatusMsg').innerText = '';
         } else {
@@ -327,7 +422,7 @@
 
     document.getElementById('startNewServiceBtn').addEventListener('click', () => {
         currentpackIndex = 1;
-        packDataCache = {}; // Start with a completely fresh state
+        packDataCache = {}; 
         navigateTo('serviceSection', 'navHome');
         renderpackUI();
     });
@@ -342,7 +437,6 @@
             const querySnapshot = await getDocs(q);
             
             const serviceMap = {};
-            // Get the absolute newest document for each pack ID
             querySnapshot.forEach(doc => {
                 const data = doc.data();
                 if (!serviceMap[data.packId] || (data.lastUpdated > serviceMap[data.packId].lastUpdated)) {
@@ -350,7 +444,6 @@
                 }
             });
 
-            // Populate the local cache with the fetched data
             packDataCache = {};
             for (let i = 1; i <= totalpacks; i++) {
                 const record = serviceMap[`pack ${i}`];
@@ -371,7 +464,7 @@
         }
     });
 
-    // --- 3. GENERAL SITE NOTES LOGIC ---
+    // --- 4. GENERAL SITE NOTES LOGIC ---
     document.getElementById('noteSiteSelect').addEventListener('change', async (e) => {
         const site = e.target.value;
         const area = document.getElementById('notesEditArea');
@@ -426,7 +519,7 @@
         setTimeout(() => msg.innerText = "", 3000);
     });
 
-    // --- 4. PRINT SUMMARY LOGIC ---
+    // --- 5. PRINT SUMMARY LOGIC ---
     document.getElementById('generatePrintBtn').addEventListener('click', async () => {
         const site = document.getElementById('printSiteSelect').value;
         const msg = document.getElementById('printStatusMsg');
@@ -458,16 +551,15 @@
             const today = new Date().toLocaleDateString();
             let html = `
                 <div class="print-header">
-                    <h1>Service Summary: ${site}</h1>
+                    <h1>Service Issue Summary: ${site}</h1>
                     <p><strong>Date Printed:</strong> ${today}</p>
-                    <p><strong>Service Completed by: Robert</strong>
                     <p><strong>General Notes:</strong><br> ${generalNotes.replace(/\n/g, '<br>')}</p>
                 </div>
                 <h2>Pack Issues Addressed:</h2>
             `;
 
             let hasIssues = false;
-            const total = sitesData[site];
+            const total = sitesData[site].count;
 
             for (let i = 1; i <= total; i++) {
                 const record = serviceMap[`pack ${i}`];
@@ -504,7 +596,7 @@
         }
     });
 
-    // --- 5. GRID REPORT LOGIC ---
+    // --- 6. GRID REPORT LOGIC ---
     document.getElementById('loadReportBtn').addEventListener('click', async () => {
         const site = document.getElementById('reportSiteSelect').value;
         if (!site) return alert("Please select a site first.");
@@ -526,7 +618,7 @@
                 }
             });
 
-            const total = sitesData[site];
+            const total = sitesData[site].count;
             let tableHTML = `<table><thead><tr><th>Pack #</th><th>Right Shoulder</th><th>Left Shoulder</th><th>Front</th><th>Back</th><th>Gun</th><th>Issues & Notes</th></tr></thead><tbody>`;
 
             for (let i = 1; i <= total; i++) {
@@ -557,7 +649,7 @@
         btn.innerText = "Generate Table";
     });
 
-    // --- 6. CHECKLIST SERVICE SESSION & AUTO-SAVE ---
+    // --- 7. CHECKLIST SERVICE SESSION & AUTO-SAVE ---
     async function triggerBackgroundSave() {
         if (!isDirty) return; 
         const packToSave = currentpackIndex; 
