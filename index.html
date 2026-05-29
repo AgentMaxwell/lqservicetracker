@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gear Service Tracker</title>
+    <title>Pack Service Tracker</title>
     <style>
         /* Tablet-Optimized CSS */
         :root {
@@ -19,7 +19,7 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             margin: 0;
-            padding: 0; /* Removed padding to accommodate full-width nav */
+            padding: 0;
             color: #333;
         }
         
@@ -68,6 +68,8 @@
         .btn-primary { background-color: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer;}
         .btn-primary:active { background-color: #004080; }
         .btn-outline { background-color: transparent; color: var(--primary); border: 2px solid var(--primary); font-weight: bold; cursor: pointer;}
+        .btn-secondary { background-color: var(--secondary); color: white; border: none; font-weight: bold; cursor: pointer;}
+        .btn-secondary:active { background-color: #5a6268; }
         
         /* Sections */
         .app-section { display: none; }
@@ -83,7 +85,7 @@
         .nav-status { text-align: center; font-size: 1.4rem; font-weight: bold; }
         .save-indicator { font-size: 0.9rem; color: var(--secondary); display: block; margin-top: 5px; font-weight: normal;}
         
-        /* Gear Parts Checklist */
+        /* Pack Parts Checklist */
         .part-section { border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: #fafafa; }
         .part-header { font-size: 1.3rem; font-weight: bold; margin-bottom: 10px; }
         .button-group { display: flex; gap: 10px; }
@@ -124,8 +126,8 @@
                 font-family: sans-serif;
             }
             .print-header { border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
-            .print-gear-block { border-bottom: 1px solid #ccc; padding-bottom: 15px; margin-bottom: 15px; }
-            .print-gear-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
+            .print-pack-block { border-bottom: 1px solid #ccc; padding-bottom: 15px; margin-bottom: 15px; }
+            .print-pack-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
             .print-issue-list { margin: 0; padding-left: 20px; }
             .print-issue-list li { margin-bottom: 5px; }
         }
@@ -140,7 +142,7 @@
 </nav>
 
 <div class="container">
-    <h1>Gear Service Tracker</h1>
+    <h1>Pack Service Tracker</h1>
 
     <div id="setupSection" class="app-section active">
         <label for="siteSelect">Select Site to Start Service:</label>
@@ -148,7 +150,16 @@
             <option value="">Loading sites...</option>
         </select>
         
-        <div class="action-group">
+        <div id="serviceTypeSelection" style="display: none; background: #f0f4f8; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #d0deeb;">
+            <p style="text-align: center; font-size: 1.2rem; font-weight: bold; margin-top: 0;">Site Selected. Choose an action:</p>
+            <div class="action-group">
+                <button class="btn-primary" id="startNewServiceBtn">Start New Service</button>
+                <button class="btn-secondary" id="loadPrevServiceBtn">Load Previous Service</button>
+            </div>
+            <div id="loadStatusMsg" style="text-align: center; font-weight: bold;"></div>
+        </div>
+
+        <div class="action-group" id="mainActionGroup">
             <button class="btn-outline" id="toggleAdminBtn">+ Manage Sites</button>
             <button class="btn-outline" id="viewReportsBtn">📊 View Full Grid Report</button>
         </div>
@@ -158,14 +169,14 @@
         <h2>Add New Site</h2>
         <label>Site Name:</label>
         <input type="text" id="newSiteName" placeholder="e.g. Site Delta">
-        <label>Number of Gears:</label>
+        <label>Number of packs:</label>
         <input type="number" id="newSiteCount" placeholder="e.g. 12">
         <button class="btn-primary" id="saveSiteBtn">Save Site to Cloud</button>
     </div>
 
     <div id="siteNotesSection" class="app-section">
         <h2>General Site Notes</h2>
-        <p style="color: #666; text-align: center;">Record general facility issues, missing packs, or broad observations not tied to a specific gear.</p>
+        <p style="color: #666; text-align: center;">Record general facility issues, missing packs, or broad observations not tied to a specific pack.</p>
         <label for="noteSiteSelect">Select Site:</label>
         <select id="noteSiteSelect">
             <option value="">-- Choose Site --</option>
@@ -181,7 +192,7 @@
 
     <div id="printReportSection" class="app-section">
         <h2>Print Issues Summary</h2>
-        <p style="color: #666; text-align: center;">Generate a clean, printer-friendly list of only the gear that requires fixing.</p>
+        <p style="color: #666; text-align: center;">Generate a clean, printer-friendly list of only the pack that requires fixing.</p>
         <label for="printSiteSelect">Select Site to Print:</label>
         <select id="printSiteSelect">
             <option value="">-- Choose Site --</option>
@@ -204,7 +215,7 @@
         <div class="nav-controls">
             <button class="btn-primary" id="prevBtn" disabled>&laquo; Back</button>
             <div class="nav-status">
-                <div id="gearCounter">Gear 1 of X</div>
+                <div id="packCounter">pack 1 of X</div>
                 <div class="save-indicator" id="saveIndicator">Cloud Synced ✓</div>
             </div>
             <button class="btn-primary" id="nextBtn">Next &raquo;</button>
@@ -222,35 +233,34 @@
     // App State
     let sitesData = {}; 
     let currentSiteName = "";
-    let totalGears = 0;
-    let currentGearIndex = 1;
-    let gearDataCache = {}; 
+    let totalpacks = 0;
+    let currentpackIndex = 1;
+    let packDataCache = {}; 
     let isDirty = false;    
     const partsList = ["Right Shoulder", "Left Shoulder", "Front", "Back", "Gun"];
 
     // DOM Elements - Navigation
     const navButtons = document.querySelectorAll('.top-nav button');
     const sections = document.querySelectorAll('.app-section');
+    const serviceTypeSelection = document.getElementById('serviceTypeSelection');
     
     // --- 0. MENU NAVIGATION LOGIC ---
     async function navigateTo(sectionId, clickedBtnId) {
-        // If leaving the service section, force an auto-save
         if (document.getElementById('serviceSection').classList.contains('active')) {
             await triggerBackgroundSave();
         }
 
-        // Update UI
         sections.forEach(sec => sec.classList.remove('active'));
         navButtons.forEach(btn => btn.classList.remove('active'));
         
         document.getElementById(sectionId).classList.add('active');
         if (clickedBtnId) document.getElementById(clickedBtnId).classList.add('active');
         
-        // Hide admin section if it was left open
         document.getElementById('adminSection').style.display = 'none';
         
-        // Reset dropdowns
+        // Reset Setup UI
         document.getElementById('siteSelect').value = "";
+        serviceTypeSelection.style.display = 'none';
     }
 
     document.getElementById('navHome').addEventListener('click', () => navigateTo('setupSection', 'navHome'));
@@ -268,9 +278,9 @@
             sitesData = {};
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
-                sitesData[data.name] = data.gearCount;
+                sitesData[data.name] = data.packCount;
                 selects.forEach(id => {
-                    document.getElementById(id).innerHTML += `<option value="${data.name}">${data.name} (${data.gearCount} Gears)</option>`;
+                    document.getElementById(id).innerHTML += `<option value="${data.name}">${data.name} (${data.packCount} packs)</option>`;
                 });
             });
         } catch (error) {
@@ -286,12 +296,12 @@
     document.getElementById('saveSiteBtn').addEventListener('click', async () => {
         const name = document.getElementById('newSiteName').value.trim();
         const count = parseInt(document.getElementById('newSiteCount').value);
-        if (!name || isNaN(count) || count <= 0) return alert("Please enter a valid name and gear count.");
+        if (!name || isNaN(count) || count <= 0) return alert("Please enter a valid name and pack count.");
         
         const btn = document.getElementById('saveSiteBtn');
         btn.innerText = "Saving...";
         try {
-            await addDoc(collection(db, "sites"), { name: name, gearCount: count });
+            await addDoc(collection(db, "sites"), { name: name, packCount: count });
             document.getElementById('newSiteName').value = "";
             document.getElementById('newSiteCount').value = "";
             document.getElementById('adminSection').style.display = 'none';
@@ -303,7 +313,65 @@
         }
     });
 
-    // --- 2. GENERAL SITE NOTES LOGIC ---
+    // --- 2. START / LOAD SERVICE FLOW ---
+    document.getElementById('siteSelect').addEventListener('change', (e) => {
+        currentSiteName = e.target.value;
+        if (currentSiteName) {
+            totalpacks = sitesData[currentSiteName];
+            serviceTypeSelection.style.display = 'block';
+            document.getElementById('loadStatusMsg').innerText = '';
+        } else {
+            serviceTypeSelection.style.display = 'none';
+        }
+    });
+
+    document.getElementById('startNewServiceBtn').addEventListener('click', () => {
+        currentpackIndex = 1;
+        packDataCache = {}; // Start with a completely fresh state
+        navigateTo('serviceSection', 'navHome');
+        renderpackUI();
+    });
+
+    document.getElementById('loadPrevServiceBtn').addEventListener('click', async () => {
+        const msg = document.getElementById('loadStatusMsg');
+        msg.innerText = "Fetching previous records...";
+        msg.style.color = "var(--primary)";
+
+        try {
+            const q = query(collection(db, "services"), where("site", "==", currentSiteName));
+            const querySnapshot = await getDocs(q);
+            
+            const serviceMap = {};
+            // Get the absolute newest document for each pack ID
+            querySnapshot.forEach(doc => {
+                const data = doc.data();
+                if (!serviceMap[data.packId] || (data.lastUpdated > serviceMap[data.packId].lastUpdated)) {
+                    serviceMap[data.packId] = data;
+                }
+            });
+
+            // Populate the local cache with the fetched data
+            packDataCache = {};
+            for (let i = 1; i <= totalpacks; i++) {
+                const record = serviceMap[`pack ${i}`];
+                if (record && record.serviceDetails) {
+                    packDataCache[i] = record.serviceDetails;
+                }
+            }
+
+            currentpackIndex = 1;
+            msg.innerText = "";
+            navigateTo('serviceSection', 'navHome');
+            renderpackUI();
+
+        } catch (error) {
+            console.error(error);
+            msg.innerText = "Error loading previous records.";
+            msg.style.color = "var(--danger)";
+        }
+    });
+
+    // --- 3. GENERAL SITE NOTES LOGIC ---
     document.getElementById('noteSiteSelect').addEventListener('change', async (e) => {
         const site = e.target.value;
         const area = document.getElementById('notesEditArea');
@@ -358,7 +426,7 @@
         setTimeout(() => msg.innerText = "", 3000);
     });
 
-    // --- 3. PRINT SUMMARY LOGIC ---
+    // --- 4. PRINT SUMMARY LOGIC ---
     document.getElementById('generatePrintBtn').addEventListener('click', async () => {
         const site = document.getElementById('printSiteSelect').value;
         const msg = document.getElementById('printStatusMsg');
@@ -370,49 +438,47 @@
         msg.style.color = "black";
 
         try {
-            // 1. Fetch Issues
             const q = query(collection(db, "services"), where("site", "==", site));
             const querySnapshot = await getDocs(q);
             
             const serviceMap = {};
             querySnapshot.forEach(doc => {
                 const data = doc.data();
-                if (!serviceMap[data.gearId] || (data.lastUpdated > serviceMap[data.gearId].lastUpdated)) {
-                    serviceMap[data.gearId] = data;
+                if (!serviceMap[data.packId] || (data.lastUpdated > serviceMap[data.packId].lastUpdated)) {
+                    serviceMap[data.packId] = data;
                 }
             });
 
-            // 2. Fetch General Site Notes
             let generalNotes = "None recorded.";
             const notesSnap = await getDoc(doc(db, "site_notes", site.replace(/\s+/g, '-')));
             if (notesSnap.exists() && notesSnap.data().notes) {
                 generalNotes = notesSnap.data().notes;
             }
 
-            // 3. Build HTML for Print
             const today = new Date().toLocaleDateString();
             let html = `
                 <div class="print-header">
-                    <h1>Service Issue Summary: ${site}</h1>
+                    <h1>Service Summary: ${site}</h1>
                     <p><strong>Date Printed:</strong> ${today}</p>
-                    <p><strong>General Site Notes:</strong><br> ${generalNotes.replace(/\n/g, '<br>')}</p>
+                    <p><strong>Service Completed by: Robert</strong>
+                    <p><strong>General Notes:</strong><br> ${generalNotes.replace(/\n/g, '<br>')}</p>
                 </div>
-                <h2>Gear Requiring Attention:</h2>
+                <h2>Pack Issues Addressed:</h2>
             `;
 
             let hasIssues = false;
             const total = sitesData[site];
 
             for (let i = 1; i <= total; i++) {
-                const record = serviceMap[`Gear ${i}`];
+                const record = serviceMap[`pack ${i}`];
                 if (record) {
                     const parts = record.serviceDetails;
                     const issues = Object.keys(parts).filter(p => parts[p].status === 'Issue');
                     
                     if (issues.length > 0) {
                         hasIssues = true;
-                        html += `<div class="print-gear-block">`;
-                        html += `<div class="print-gear-title">Gear ${i}</div>`;
+                        html += `<div class="print-pack-block">`;
+                        html += `<div class="print-pack-title">Pack ${i}</div>`;
                         html += `<ul class="print-issue-list">`;
                         issues.forEach(part => {
                             const noteText = parts[part].notes ? ` - <em>${parts[part].notes}</em>` : "";
@@ -424,13 +490,11 @@
             }
 
             if (!hasIssues) {
-                html += `<p style="color: green; font-weight: bold;">No gear issues recorded for this site. All Good!</p>`;
+                html += `<p style="color: green; font-weight: bold;">No pack issues recorded for this site. All Good!</p>`;
             }
 
             printArea.innerHTML = html;
             msg.innerText = "";
-            
-            // Trigger browser print dialog
             window.print();
 
         } catch (error) {
@@ -440,7 +504,7 @@
         }
     });
 
-    // --- 4. GRID REPORT LOGIC (Existing unchanged logic) ---
+    // --- 5. GRID REPORT LOGIC ---
     document.getElementById('loadReportBtn').addEventListener('click', async () => {
         const site = document.getElementById('reportSiteSelect').value;
         if (!site) return alert("Please select a site first.");
@@ -457,16 +521,16 @@
             const serviceMap = {};
             querySnapshot.forEach(doc => {
                 const data = doc.data();
-                if (!serviceMap[data.gearId] || (data.lastUpdated > serviceMap[data.gearId].lastUpdated)) {
-                    serviceMap[data.gearId] = data;
+                if (!serviceMap[data.packId] || (data.lastUpdated > serviceMap[data.packId].lastUpdated)) {
+                    serviceMap[data.packId] = data;
                 }
             });
 
             const total = sitesData[site];
-            let tableHTML = `<table><thead><tr><th>Gear #</th><th>Right Shoulder</th><th>Left Shoulder</th><th>Front</th><th>Back</th><th>Gun</th><th>Issues & Notes</th></tr></thead><tbody>`;
+            let tableHTML = `<table><thead><tr><th>Pack #</th><th>Right Shoulder</th><th>Left Shoulder</th><th>Front</th><th>Back</th><th>Gun</th><th>Issues & Notes</th></tr></thead><tbody>`;
 
             for (let i = 1; i <= total; i++) {
-                const record = serviceMap[`Gear ${i}`];
+                const record = serviceMap[`pack ${i}`];
                 if (record) {
                     const parts = record.serviceDetails;
                     let allNotes = [];
@@ -493,22 +557,11 @@
         btn.innerText = "Generate Table";
     });
 
-    // --- 5. SERVICE SESSION & AUTO-SAVE (Existing logic adapted for Nav) ---
-    document.getElementById('siteSelect').addEventListener('change', (e) => {
-        currentSiteName = e.target.value;
-        if (currentSiteName) {
-            totalGears = sitesData[currentSiteName];
-            currentGearIndex = 1;
-            gearDataCache = {}; 
-            navigateTo('serviceSection', 'navHome'); // Uses nav logic to switch view
-            renderGearUI();
-        }
-    });
-
+    // --- 6. CHECKLIST SERVICE SESSION & AUTO-SAVE ---
     async function triggerBackgroundSave() {
         if (!isDirty) return; 
-        const gearToSave = currentGearIndex; 
-        const dataToSave = gearDataCache[gearToSave];
+        const packToSave = currentpackIndex; 
+        const dataToSave = packDataCache[packToSave];
         isDirty = false; 
         document.getElementById('saveIndicator').innerText = "Saving...";
         document.getElementById('saveIndicator').style.color = "#ffc107"; 
@@ -516,11 +569,11 @@
         try {
             const today = new Date().toISOString().split('T')[0];
             const safeSiteName = currentSiteName.replace(/\s+/g, '-');
-            const docId = `${safeSiteName}-${today}-Gear-${gearToSave}`;
+            const docId = `${safeSiteName}-${today}-pack-${packToSave}`;
 
             await setDoc(doc(db, "services", docId), {
                 site: currentSiteName,
-                gearId: `Gear ${gearToSave}`,
+                packId: `pack ${packToSave}`,
                 serviceDetails: dataToSave,
                 lastUpdated: serverTimestamp()
             });
@@ -536,31 +589,31 @@
 
     document.getElementById('prevBtn').addEventListener('click', async () => {
         await triggerBackgroundSave();
-        if (currentGearIndex > 1) { currentGearIndex--; renderGearUI(); }
+        if (currentpackIndex > 1) { currentpackIndex--; renderpackUI(); }
     });
 
     document.getElementById('nextBtn').addEventListener('click', async () => {
         await triggerBackgroundSave();
-        if (currentGearIndex < totalGears) {
-            currentGearIndex++; renderGearUI();
+        if (currentpackIndex < totalpacks) {
+            currentpackIndex++; renderpackUI();
         } else {
-            alert("You have reached the end of the gears for this site.");
+            alert("You have reached the end of the packs for this site.");
         }
     });
 
-    function renderGearUI() {
-        document.getElementById('gearCounter').innerText = `Gear ${currentGearIndex} of ${totalGears}`;
-        document.getElementById('prevBtn').disabled = currentGearIndex === 1;
-        document.getElementById('nextBtn').innerText = currentGearIndex === totalGears ? "Finish" : "Next \u00BB";
+    function renderpackUI() {
+        document.getElementById('packCounter').innerText = `Pack ${currentpackIndex} of ${totalpacks}`;
+        document.getElementById('prevBtn').disabled = currentpackIndex === 1;
+        document.getElementById('nextBtn').innerText = currentpackIndex === totalpacks ? "Finish" : "Next \u00BB";
         document.getElementById('saveIndicator').innerText = "Cloud Synced ✓";
         document.getElementById('saveIndicator').style.color = "var(--secondary)";
 
-        if (!gearDataCache[currentGearIndex]) {
-            gearDataCache[currentGearIndex] = {};
-            partsList.forEach(part => { gearDataCache[currentGearIndex][part] = { status: null, notes: "" }; });
+        if (!packDataCache[currentpackIndex]) {
+            packDataCache[currentpackIndex] = {};
+            partsList.forEach(part => { packDataCache[currentpackIndex][part] = { status: null, notes: "" }; });
         }
 
-        const currentData = gearDataCache[currentGearIndex];
+        const currentData = packDataCache[currentpackIndex];
         const container = document.getElementById('partsContainer');
         container.innerHTML = '';
 
@@ -608,12 +661,12 @@
 
                 if (isGoodBtn) {
                     notesArea.classList.remove('visible');
-                    gearDataCache[currentGearIndex][part].status = "Good";
-                    gearDataCache[currentGearIndex][part].notes = "";
+                    packDataCache[currentpackIndex][part].status = "Good";
+                    packDataCache[currentpackIndex][part].notes = "";
                     notesArea.querySelector('textarea').value = "";
                 } else {
                     notesArea.classList.add('visible');
-                    gearDataCache[currentGearIndex][part].status = "Issue";
+                    packDataCache[currentpackIndex][part].status = "Issue";
                 }
             });
         });
@@ -625,7 +678,7 @@
                 document.getElementById('saveIndicator').style.color = "var(--secondary)";
                 
                 const part = e.target.getAttribute('data-part');
-                gearDataCache[currentGearIndex][part].notes = e.target.value;
+                packDataCache[currentpackIndex][part].notes = e.target.value;
             });
         });
     }
