@@ -13,7 +13,6 @@
             --danger: #dc3545;
             --bg-color: #f4f7f6;
             --card-bg: #ffffff;
-            --nav-bg: #1a2a3a;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -23,46 +22,37 @@
             color: #333;
         }
         
-        /* Top Navigation Menu */
-        .top-nav {
-            background-color: var(--nav-bg);
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            padding: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .top-nav button {
-            background: transparent;
-            color: white;
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 8px;
-            padding: 10px 20px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            width: auto;
-            margin: 0;
-            transition: background 0.2s;
-        }
-        .top-nav button:active, .top-nav button.active {
-            background: var(--primary);
-            border-color: white;
-        }
-
         .container {
-            max-width: 1000px; /* Slightly wider to accommodate sidebar */
+            max-width: 1000px; /* Accommodates sidebar */
             margin: 20px auto;
             background: var(--card-bg);
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
-        h1, h2, h3 { text-align: center; color: var(--primary); margin-top: 0;}
+        
+        /* New App Header with Home Button */
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eef2f5;
+        }
+        .app-header h1 { margin: 0; text-align: center; flex: 1; color: var(--primary); }
+        .home-btn {
+            background-color: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer;
+            padding: 12px 20px; font-size: 1.1rem; border-radius: 8px; width: auto; margin: 0;
+        }
+        .home-btn:active { background-color: #004080; }
+        .header-spacer { width: 100px; } /* Keeps the title perfectly centered */
+
+        h2, h3 { text-align: center; color: var(--primary); margin-top: 0;}
         
         /* Form Elements */
         label { font-weight: bold; display: block; margin-bottom: 8px; font-size: 1.2rem;}
-        select, input, button:not(.top-nav button):not(.admin-btn):not(.close-btn) {
+        select, input, button:not(.home-btn):not(.admin-btn):not(.close-btn) {
             width: 100%; padding: 15px; font-size: 1.2rem; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 20px; box-sizing: border-box;
         }
         .btn-primary { background-color: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer;}
@@ -91,21 +81,10 @@
         .btn-del { background-color: var(--danger); font-weight: bold;}
 
         /* --- ACTIVE SERVICE LAYOUT (Sidebar & Main Content) --- */
-        .service-layout {
-            display: flex;
-            gap: 20px;
-            align-items: flex-start;
-        }
+        .service-layout { display: flex; gap: 20px; align-items: flex-start; }
         .service-main { flex: 2; min-width: 0; }
         .service-sidebar { 
-            flex: 1; 
-            background: #f0f4f8; 
-            padding: 20px; 
-            border-radius: 8px; 
-            border: 1px solid #d0deeb; 
-            min-width: 0;
-            position: sticky;
-            top: 20px;
+            flex: 1; background: #f0f4f8; padding: 20px; border-radius: 8px; border: 1px solid #d0deeb; min-width: 0; position: sticky; top: 20px;
         }
         
         /* Sidebar Elements */
@@ -114,9 +93,7 @@
         .service-sidebar button { padding: 12px; font-size: 1.1rem; margin-bottom: 10px; }
 
         /* Navigation Controls */
-        .nav-controls {
-            display: flex; justify-content: space-between; align-items: center; background: #eef2f5; padding: 15px; border-radius: 8px; margin-bottom: 20px; gap: 15px;
-        }
+        .nav-controls { display: flex; justify-content: space-between; align-items: center; background: #eef2f5; padding: 15px; border-radius: 8px; margin-bottom: 20px; gap: 15px; }
         .nav-controls button { flex: 1; max-width: 150px; margin: 0; padding: 15px 10px; font-size: 1.1rem; }
         .nav-status { flex: 2; display: flex; flex-direction: column; justify-content: center; text-align: center; font-size: 1.4rem; font-weight: bold; }
         .save-indicator { font-size: 0.9rem; color: var(--secondary); display: block; margin-top: 5px; font-weight: normal;}
@@ -174,14 +151,12 @@
 </head>
 <body>
 
-<nav class="top-nav">
-    <button id="navHome" class="active">🏠 Home</button>
-    <button id="navPrintReport">🖨️ Print Report</button>
-    <button id="navGridReport">📊 Master Grid</button>
-</nav>
-
 <div class="container">
-    <h1>Pack Service Tracker</h1>
+    
+    <div class="app-header">
+        <button id="navHomeBtn" class="home-btn">🏠 Home</button>
+        <h1>Pack Service Tracker</h1>
+        <div class="header-spacer"></div> </div>
 
     <div id="setupSection" class="app-section active">
         <label for="siteSelect">Select Site to Start Service:</label>
@@ -211,7 +186,10 @@
             <div id="loadStatusMsg" style="text-align: center; font-weight: bold; margin-top: 10px;"></div>
         </div>
 
-        <button class="btn-outline" id="toggleAdminBtn">⚙️ Manage Sites</button>
+        <div class="action-group" id="mainActionGroup">
+            <button class="btn-outline" id="toggleAdminBtn">⚙️ Manage Sites</button>
+            <button class="btn-outline" id="viewReportsBtn">📊 View Full Grid Report</button>
+        </div>
     </div>
 
     <div id="adminSection" class="app-section">
@@ -229,17 +207,6 @@
         <label>Number of Packs:</label>
         <input type="number" id="newSiteCount" placeholder="e.g. 12">
         <button class="btn-primary" id="saveSiteBtn">Save New Site</button>
-    </div>
-
-    <div id="printReportSection" class="app-section">
-        <h2>Print Issues Summary</h2>
-        <p style="color: #666; text-align: center;">Generate a clean, printer-friendly list of only the pack that requires fixing.</p>
-        <label for="printSiteSelect">Select Site to Print:</label>
-        <select id="printSiteSelect">
-            <option value="">-- Choose Site --</option>
-        </select>
-        <button class="btn-primary" id="generatePrintBtn">Generate & Print Summary</button>
-        <div id="printStatusMsg" style="text-align: center; font-weight: bold; margin-top: 10px;"></div>
     </div>
 
     <div id="reportSection" class="app-section">
@@ -271,9 +238,11 @@
             </div>
 
             <div class="service-sidebar">
-                <div class="sidebar-title">Global Controls</div>
+                <div class="sidebar-title">Service Controls</div>
                 
                 <button class="btn-outline" id="viewOverlayGridBtn" style="background: white;">📊 View Grid Overlay</button>
+                
+                <button class="btn-outline" id="sidebarPrintBtn" style="background: white; border-color: #333; color: #333;">🖨️ Print Active Report</button>
                 
                 <label style="margin-top: 15px; font-size: 1.1rem;">General Site Notes</label>
                 <textarea id="sidebarSiteNotes" placeholder="Enter broad facility issues, missing packs, etc..."></textarea>
@@ -304,6 +273,7 @@
     // App State
     let sitesData = {}; 
     let currentSiteName = "";
+    let activeServiceDate = ""; // Tracks if we are working on "today" or a historical date
     let totalpacks = 0;
     let currentpackIndex = 1;
     let packDataCache = {}; 
@@ -312,40 +282,35 @@
     const partsList = ["Right Shoulder", "Left Shoulder", "Front", "Back", "Gun"];
 
     // DOM Elements
-    const navButtons = document.querySelectorAll('.top-nav button');
     const sections = document.querySelectorAll('.app-section');
     const serviceTypeSelection = document.getElementById('serviceTypeSelection');
     const gridModal = document.getElementById('gridOverlayModal');
     
     // --- 0. MENU NAVIGATION LOGIC ---
-    async function navigateTo(sectionId, clickedBtnId) {
+    async function navigateTo(sectionId) {
         if (document.getElementById('serviceSection').classList.contains('active')) {
             await triggerBackgroundSave();
         }
 
         sections.forEach(sec => sec.classList.remove('active'));
-        navButtons.forEach(btn => btn.classList.remove('active'));
-        
         document.getElementById(sectionId).classList.add('active');
-        if (clickedBtnId) document.getElementById(clickedBtnId).classList.add('active');
         
+        // Reset Setup UI
         document.getElementById('siteSelect').value = "";
         serviceTypeSelection.style.display = 'none';
-        
         document.getElementById('initialLoadGroup').style.display = 'flex';
         document.getElementById('dateSelectionUI').style.display = 'none';
         
         if(sectionId === 'adminSection') renderAdminList();
     }
 
-    document.getElementById('navHome').addEventListener('click', () => navigateTo('setupSection', 'navHome'));
-    document.getElementById('navPrintReport').addEventListener('click', () => navigateTo('printReportSection', 'navPrintReport'));
-    document.getElementById('navGridReport').addEventListener('click', () => navigateTo('reportSection', 'navGridReport'));
-    document.getElementById('toggleAdminBtn').addEventListener('click', () => navigateTo('adminSection', null));
+    document.getElementById('navHomeBtn').addEventListener('click', () => navigateTo('setupSection'));
+    document.getElementById('toggleAdminBtn').addEventListener('click', () => navigateTo('adminSection'));
+    document.getElementById('viewReportsBtn').addEventListener('click', () => navigateTo('reportSection'));
 
     // --- 1. INITIALIZATION & SITES MANAGEMENT ---
     async function loadSites() {
-        const selects = ['siteSelect', 'reportSiteSelect', 'printSiteSelect'];
+        const selects = ['siteSelect', 'reportSiteSelect'];
         selects.forEach(id => document.getElementById(id).innerHTML = '<option value="">-- Choose Site --</option>');
         
         try {
@@ -438,7 +403,7 @@
         } catch (error) { alert("Failed to save site."); }
     });
 
-    // --- 3. START / LOAD SERVICE FLOW ---
+    // --- 3. START / LOAD SERVICE FLOW (WITH DATES) ---
     document.getElementById('siteSelect').addEventListener('change', (e) => {
         currentSiteName = e.target.value;
         if (currentSiteName) {
@@ -455,8 +420,10 @@
     document.getElementById('startNewServiceBtn').addEventListener('click', async () => {
         currentpackIndex = 1;
         packDataCache = {}; 
-        await loadSidebarNotes(); // Fetch existing notes for sidebar
-        navigateTo('serviceSection', 'navHome');
+        activeServiceDate = new Date().toISOString().split('T')[0]; // Set date to today
+        
+        await loadSidebarNotes(); 
+        navigateTo('serviceSection');
         renderpackUI();
     });
 
@@ -509,6 +476,8 @@
         const selectedDate = document.getElementById('serviceDateSelect').value;
         if (!selectedDate) return alert("Select a date.");
 
+        activeServiceDate = selectedDate; // Set active date to historical date
+
         const serviceMap = {};
         fetchedServiceDocs.forEach(record => {
             if (record.id.includes(selectedDate)) {
@@ -527,9 +496,8 @@
         currentpackIndex = 1;
         document.getElementById('loadStatusMsg').innerText = "";
         
-        await loadSidebarNotes(); // Fetch existing notes for sidebar
-        
-        navigateTo('serviceSection', 'navHome');
+        await loadSidebarNotes(); 
+        navigateTo('serviceSection');
         renderpackUI();
     });
 
@@ -569,55 +537,54 @@
         setTimeout(() => msg.innerText = "", 3000);
     });
 
-    // --- 5. PRINT SUMMARY LOGIC ---
-    document.getElementById('generatePrintBtn').addEventListener('click', async () => {
-        const site = document.getElementById('printSiteSelect').value;
-        const msg = document.getElementById('printStatusMsg');
+    // --- 5. SIDEBAR PRINT REPORT LOGIC ---
+    document.getElementById('sidebarPrintBtn').addEventListener('click', async () => {
+        // Force a save of whatever is currently unsaved on screen
+        await triggerBackgroundSave();
+
         const printArea = document.getElementById('printOnlyArea');
-        if (!site) return alert("Select a site.");
-        msg.innerText = "Fetching Data...";
-        
-        try {
-            const q = query(collection(db, "services"), where("site", "==", site));
-            const querySnapshot = await getDocs(q);
-            const serviceMap = {};
-            querySnapshot.forEach(doc => {
-                const data = doc.data();
-                if (!serviceMap[data.packId] || (data.lastUpdated > serviceMap[data.packId].lastUpdated)) {
-                    serviceMap[data.packId] = data;
-                }
-            });
+        const generalNotes = document.getElementById('sidebarSiteNotes').value || "None recorded.";
 
-            let generalNotes = "None recorded.";
-            const notesSnap = await getDoc(doc(db, "site_notes", site.replace(/\s+/g, '-')));
-            if (notesSnap.exists() && notesSnap.data().notes) generalNotes = notesSnap.data().notes;
+        let html = `
+            <div class="print-header">
+                <h1>Service Issue Summary: ${currentSiteName}</h1>
+                <p><strong>Service Date:</strong> ${activeServiceDate}</p>
+                <p><strong>General Notes:</strong><br> ${generalNotes.replace(/\n/g, '<br>')}</p>
+            </div>
+            <h2>Pack Issues Addressed:</h2>
+        `;
 
-            let html = `<div class="print-header"><h1>Issue Summary: ${site}</h1><p><strong>Date Printed:</strong> ${new Date().toLocaleDateString()}</p><p><strong>General Notes:</strong><br> ${generalNotes.replace(/\n/g, '<br>')}</p></div><h2>Pack Issues:</h2>`;
+        let hasIssues = false;
 
-            let hasIssues = false;
-            for (let i = 1; i <= sitesData[site].count; i++) {
-                const record = serviceMap[`pack ${i}`];
-                if (record) {
-                    const parts = record.serviceDetails;
-                    const issues = Object.keys(parts).filter(p => parts[p].status === 'Issue');
-                    if (issues.length > 0) {
-                        hasIssues = true;
-                        html += `<div class="print-pack-block"><div class="print-pack-title">Pack ${i}</div><ul class="print-issue-list">`;
-                        issues.forEach(part => html += `<li><strong>${part}:</strong> Issue logged${parts[part].notes ? ` - <em>${parts[part].notes}</em>` : ""}</li>`);
-                        html += `</ul></div>`;
-                    }
+        // Loop through the local cache to find the issues instantly
+        for (let i = 1; i <= totalpacks; i++) {
+            if (packDataCache[i]) {
+                const parts = packDataCache[i];
+                const issues = Object.keys(parts).filter(p => parts[p].status === 'Issue');
+                
+                if (issues.length > 0) {
+                    hasIssues = true;
+                    html += `<div class="print-pack-block">`;
+                    html += `<div class="print-pack-title">Pack ${i}</div>`;
+                    html += `<ul class="print-issue-list">`;
+                    issues.forEach(part => {
+                        const noteText = parts[part].notes ? ` - <em>${parts[part].notes}</em>` : "";
+                        html += `<li><strong>${part}:</strong> Issue logged${noteText}</li>`;
+                    });
+                    html += `</ul></div>`;
                 }
             }
+        }
 
-            if (!hasIssues) html += `<p style="color: green; font-weight: bold;">No issues recorded. All Good!</p>`;
-            
-            printArea.innerHTML = html;
-            msg.innerText = "";
-            window.print();
-        } catch (error) { msg.innerText = "Error generating print report."; }
+        if (!hasIssues) {
+            html += `<p style="color: green; font-weight: bold;">No pack issues recorded for this site. All Good!</p>`;
+        }
+
+        printArea.innerHTML = html;
+        window.print();
     });
 
-    // --- 6. GRID REPORT LOGIC (Reusable Builder) ---
+    // --- 6. GRID REPORT LOGIC ---
     async function buildGridTable(site, containerElement) {
         containerElement.innerHTML = '<p style="text-align: center;">Fetching Live Data...</p>';
         try {
@@ -627,6 +594,7 @@
             const serviceMap = {};
             querySnapshot.forEach(doc => {
                 const data = doc.data();
+                // If viewing history, we could filter by date, but Master Grid implies all latest data
                 if (!serviceMap[data.packId] || (data.lastUpdated > serviceMap[data.packId].lastUpdated)) {
                     serviceMap[data.packId] = data;
                 }
@@ -636,8 +604,8 @@
             let tableHTML = `<table><thead><tr><th>Pack #</th><th>Right Shoulder</th><th>Left Shoulder</th><th>Front</th><th>Back</th><th>Gun</th><th>Issues & Notes</th></tr></thead><tbody>`;
 
             for (let i = 1; i <= total; i++) {
-                // If checking the current active session site, merge unsaved cache so overlay is instantly accurate
                 let recordData = null;
+                // Merge unsaved cache if viewing active site
                 if (site === currentSiteName && packDataCache[i] && Object.keys(packDataCache[i]).some(p => packDataCache[i][p].status !== null)) {
                     recordData = packDataCache[i];
                 } else if (serviceMap[`pack ${i}`]) {
@@ -668,7 +636,7 @@
         }
     }
 
-    // Trigger for Global Grid Menu
+    // Master Grid Button
     document.getElementById('loadReportBtn').addEventListener('click', async () => {
         const site = document.getElementById('reportSiteSelect').value;
         if (!site) return alert("Select a site first.");
@@ -678,16 +646,14 @@
         btn.innerText = "Generate Table";
     });
 
-    // Trigger for Sidebar Modal Grid
+    // Sidebar Modal Grid
     document.getElementById('viewOverlayGridBtn').addEventListener('click', async () => {
         gridModal.style.display = "block";
         await buildGridTable(currentSiteName, document.getElementById('modalTableContainer'));
     });
 
-    // Modal Close Logic
     document.getElementById('closeModalBtn').addEventListener('click', () => gridModal.style.display = "none");
     window.onclick = function(event) { if (event.target == gridModal) gridModal.style.display = "none"; }
-
 
     // --- 7. CHECKLIST SERVICE SESSION & AUTO-SAVE ---
     async function triggerBackgroundSave() {
@@ -699,9 +665,10 @@
         document.getElementById('saveIndicator').style.color = "#ffc107"; 
 
         try {
-            const today = new Date().toISOString().split('T')[0];
             const safeSiteName = currentSiteName.replace(/\s+/g, '-');
-            const docId = `${safeSiteName}-${today}-pack-${packToSave}`;
+            
+            // Uses activeServiceDate (either today or chosen history date) instead of forcing today!
+            const docId = `${safeSiteName}-${activeServiceDate}-pack-${packToSave}`;
 
             await setDoc(doc(db, "services", docId), {
                 site: currentSiteName,
