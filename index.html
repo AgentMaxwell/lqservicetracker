@@ -5,30 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Pack Service Tracker</title>
     <style>
-        /* Tablet-Optimized CSS */
+        /* Tablet-Optimized DARK MODE CSS */
         :root {
-            --primary: #005A9C;
-            --secondary: #6c757d;
-            --success: #28a745;
-            --danger: #dc3545;
-            --bg-color: #f4f7f6;
-            --card-bg: #ffffff;
+            --primary: #E53935; /* Strong Red Accent */
+            --secondary: #555555; /* Dark Grey */
+            --success: #4CAF50; /* Readable Green */
+            --danger: #E53935; /* Matching Red for issues */
+            --bg-color: #121212; /* Deep Black Background */
+            --card-bg: #1E1E1E; /* Elevated Dark Grey for Cards */
+            --input-bg: #2C2C2C; /* Lighter Grey for Inputs */
+            --text-main: #E0E0E0; /* Off-White Text for readability */
+            --border-color: #333333; /* Subtle borders */
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             margin: 0;
             padding: 0;
-            color: #333;
+            color: var(--text-main);
         }
         
         .container {
-            max-width: 1100px; /* Widened slightly to maximize landscape tablet space */
+            max-width: 1100px;
             margin: 15px auto;
             background: var(--card-bg);
             padding: 20px 30px;
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.8);
+            border: 1px solid var(--border-color);
         }
         
         /* App Header with Home Button */
@@ -38,30 +42,35 @@
             justify-content: space-between;
             margin-bottom: 20px;
             padding-bottom: 10px;
-            border-bottom: 2px solid #eef2f5;
+            border-bottom: 2px solid var(--border-color);
         }
-        .app-header h1 { margin: 0; text-align: center; flex: 1; color: var(--primary); font-size: 1.8rem;}
+        .app-header h1 { margin: 0; text-align: center; flex: 1; color: var(--primary); font-size: 1.8rem; letter-spacing: 1px;}
         .home-btn {
             background-color: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer;
             padding: 10px 18px; font-size: 1rem; border-radius: 8px; width: auto; margin: 0;
         }
-        .home-btn:active { background-color: #004080; }
-        .header-spacer { width: 90px; } /* Keeps the title perfectly centered */
+        .home-btn:active { background-color: #b71c1c; }
+        .header-spacer { width: 90px; } 
 
         h2, h3 { text-align: center; color: var(--primary); margin-top: 0; margin-bottom: 15px;}
         
         /* Form Elements */
-        label { font-weight: bold; display: block; margin-bottom: 6px; font-size: 1.1rem;}
+        label { font-weight: bold; display: block; margin-bottom: 6px; font-size: 1.1rem; color: #bbb;}
         select, input, button:not(.home-btn):not(.admin-btn):not(.close-btn) {
-            width: 100%; padding: 12px; font-size: 1.1rem; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 15px; box-sizing: border-box;
+            width: 100%; padding: 12px; font-size: 1.1rem; border-radius: 8px; border: 1px solid var(--border-color); 
+            margin-bottom: 15px; box-sizing: border-box; background-color: var(--input-bg); color: var(--text-main);
         }
-        .btn-primary { background-color: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer;}
-        .btn-primary:active { background-color: #004080; }
-        .btn-outline { background-color: transparent; color: var(--primary); border: 2px solid var(--primary); font-weight: bold; cursor: pointer;}
-        .btn-secondary { background-color: var(--secondary); color: white; border: none; font-weight: bold; cursor: pointer;}
-        .btn-secondary:active { background-color: #5a6268; }
-        .btn-danger { background-color: var(--danger); color: white; border: none; font-weight: bold; cursor: pointer;}
-        .btn-success { background-color: var(--success); color: white; border: none; font-weight: bold; cursor: pointer;}
+        select:focus, input:focus, textarea:focus { outline: 2px solid var(--primary); border-color: transparent; }
+        
+        /* Button Styles */
+        .btn-primary { background-color: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; }
+        .btn-primary:active { background-color: #b71c1c; }
+        .btn-outline { background-color: transparent; color: var(--primary); border: 2px solid var(--primary); font-weight: bold; cursor: pointer; }
+        .btn-outline:active { background-color: rgba(229, 57, 53, 0.1); }
+        .btn-secondary { background-color: var(--secondary); color: white; border: none; font-weight: bold; cursor: pointer; }
+        .btn-secondary:active { background-color: #444; }
+        .btn-danger { background-color: var(--danger); color: white; border: none; font-weight: bold; cursor: pointer; }
+        .btn-success { background-color: var(--success); color: white; border: none; font-weight: bold; cursor: pointer; }
         .btn-success:active { opacity: 0.8; }
         
         /* Sections */
@@ -72,43 +81,38 @@
         /* Admin Management List */
         .site-manager-item {
             display: flex; justify-content: space-between; align-items: center;
-            background: #f9f9f9; border: 1px solid #ddd; padding: 12px; border-radius: 8px; margin-bottom: 10px;
+            background: var(--input-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; margin-bottom: 10px;
         }
-        .site-manager-item strong { font-size: 1.1rem; }
+        .site-manager-item strong { font-size: 1.1rem; color: #fff;}
         .admin-controls { display: flex; gap: 8px; }
         .admin-btn { padding: 8px 12px; font-size: 0.95rem; border-radius: 6px; cursor: pointer; border: none; color: white;}
-        .btn-edit { background-color: #ffc107; color: #333; font-weight: bold;}
+        .btn-edit { background-color: #f57c00; color: white; font-weight: bold;}
         .btn-del { background-color: var(--danger); font-weight: bold;}
 
-        /* --- ACTIVE SERVICE LAYOUT (Sidebar & Main Content) --- */
+        /* --- ACTIVE SERVICE LAYOUT --- */
         .service-layout { display: flex; gap: 15px; align-items: flex-start; }
-        .service-main { flex: 2.5; min-width: 0; } /* Gave main content more relative space */
+        .service-main { flex: 2.5; min-width: 0; } 
         .service-sidebar { 
-            flex: 1; background: #f0f4f8; padding: 15px; border-radius: 8px; border: 1px solid #d0deeb; min-width: 0; position: sticky; top: 15px;
+            flex: 1; background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); min-width: 0; position: sticky; top: 15px;
         }
         
         /* Sidebar Elements */
         .sidebar-title { font-size: 1.2rem; font-weight: bold; color: var(--primary); margin-bottom: 12px; text-align: center; border-bottom: 2px solid var(--primary); padding-bottom: 5px; }
-        .service-sidebar textarea { width: 100%; height: 140px; padding: 10px; font-size: 1rem; border-radius: 8px; border: 1px solid #ccc; resize: vertical; margin-bottom: 10px; box-sizing: border-box; }
+        .service-sidebar textarea { width: 100%; height: 140px; padding: 10px; font-size: 1rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); resize: vertical; margin-bottom: 10px; box-sizing: border-box; }
         .service-sidebar button { padding: 10px; font-size: 1.05rem; margin-bottom: 8px; }
 
-        /* Navigation Controls (Condensed) */
-        .nav-controls { display: flex; justify-content: space-between; align-items: center; background: #eef2f5; padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; gap: 15px; }
+        /* Navigation Controls */
+        .nav-controls { display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; gap: 15px; border: 1px solid var(--border-color); }
         .nav-controls button { flex: 1; max-width: 120px; margin: 0; padding: 10px; font-size: 1.05rem; }
-        .nav-status { flex: 2; display: flex; flex-direction: column; justify-content: center; text-align: center; font-size: 1.2rem; font-weight: bold; }
-        .save-indicator { font-size: 0.85rem; color: var(--secondary); display: block; margin-top: 2px; font-weight: normal;}
+        .nav-status { flex: 2; display: flex; flex-direction: column; justify-content: center; text-align: center; font-size: 1.2rem; font-weight: bold; color: #fff;}
+        .save-indicator { font-size: 0.85rem; color: #aaa; display: block; margin-top: 2px; font-weight: normal;}
         
-        /* --- PACK PARTS CHECKLIST (LANDSCAPE GRID OPTIMIZATION) --- */
+        /* Pack Parts Checklist Grid */
         #packAllOkBtn { padding: 12px; margin-bottom: 15px; font-size: 1.1rem; }
-        
-        #partsContainer {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); /* Creates side-by-side columns automatically */
-            gap: 12px; /* Tighter gap between grid items */
-        }
+        #partsContainer { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
 
-        .part-section { border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px; margin-bottom: 0; background: #fafafa; }
-        .part-header { font-size: 1.1rem; font-weight: bold; margin-bottom: 8px; text-align: center; }
+        .part-section { border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; margin-bottom: 0; background: var(--input-bg); }
+        .part-header { font-size: 1.1rem; font-weight: bold; margin-bottom: 8px; text-align: center; color: #fff;}
         .button-group { display: flex; gap: 8px; }
         .btn-good, .btn-issue { flex: 1; padding: 10px; color: white; border: none; cursor: pointer; font-weight: bold; transition: opacity 0.2s; border-radius: 6px; font-size: 1rem; }
         .btn-good { background-color: var(--secondary); }
@@ -118,36 +122,39 @@
         
         .notes-area { display: none; margin-top: 10px; }
         .notes-area.visible { display: block; }
-        .notes-area textarea { width: 100%; height: 75px; padding: 8px; font-size: 1rem; border-radius: 6px; border: 1px solid #ccc; resize: vertical; box-sizing: border-box; }
+        .notes-area textarea { width: 100%; height: 75px; padding: 8px; font-size: 1rem; border-radius: 6px; border: 1px solid var(--border-color); background: #1e1e1e; color: var(--text-main); resize: vertical; box-sizing: border-box; }
 
-        /* Report Table Styles */
-        .table-responsive { overflow-x: auto; margin-top: 15px; border-radius: 8px; border: 1px solid #ddd; }
+        /* Report Table Styles (Dark Mode) */
+        .table-responsive { overflow-x: auto; margin-top: 15px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--input-bg); }
         table { width: 100%; border-collapse: collapse; min-width: 700px; }
-        th, td { border-bottom: 1px solid #ddd; padding: 12px 10px; text-align: center; }
+        th, td { border-bottom: 1px solid var(--border-color); padding: 12px 10px; text-align: center; }
         th { background-color: var(--primary); color: white; font-size: 1.05rem; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
+        tr:nth-child(even) { background-color: #262626; }
+        tr:nth-child(odd) { background-color: var(--input-bg); }
         .tick { color: var(--success); font-size: 1.4rem; font-weight: bold;}
         .cross { color: var(--danger); font-size: 1.4rem; font-weight: bold;}
-        .pending { color: #999; font-style: italic; font-size: 0.95rem; }
-        .notes-cell { text-align: left; font-size: 0.9rem; color: var(--danger); max-width: 250px; }
+        .pending { color: #888; font-style: italic; font-size: 0.95rem; }
+        .notes-cell { text-align: left; font-size: 0.9rem; color: #ff8a80; max-width: 250px; }
 
         /* Modal / Overlay Styles */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(3px); }
-        .modal-content { background-color: var(--card-bg); margin: 3% auto; padding: 25px; border-radius: 12px; width: 95%; max-width: 1000px; max-height: 90vh; overflow-y: auto; box-shadow: 0 5px 25px rgba(0,0,0,0.2); position: relative; }
-        .close-btn { position: absolute; top: 15px; right: 20px; color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; line-height: 1; }
-        .close-btn:hover, .close-btn:focus { color: #000; text-decoration: none; cursor: pointer; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(4px); }
+        .modal-content { background-color: var(--card-bg); margin: 3% auto; padding: 25px; border-radius: 12px; width: 95%; max-width: 1000px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.5); position: relative; border: 1px solid var(--border-color); }
+        .close-btn { position: absolute; top: 15px; right: 20px; color: #888; font-size: 28px; font-weight: bold; cursor: pointer; line-height: 1; }
+        .close-btn:hover, .close-btn:focus { color: #fff; text-decoration: none; cursor: pointer; }
 
-        /* Print Specific Styles */
+        /* --- INK-SAVING PRINT STYLES --- */
         #printOnlyArea { display: none; }
         @media print {
+            body { background-color: white !important; color: black !important; }
             body * { visibility: hidden; }
             #printOnlyArea, #printOnlyArea * { visibility: visible; }
-            #printOnlyArea { display: block; position: absolute; left: 0; top: 0; width: 100%; padding: 20px; color: black; font-family: sans-serif; }
+            #printOnlyArea { display: block; position: absolute; left: 0; top: 0; width: 100%; padding: 20px; color: black; font-family: sans-serif; background: white; }
             .print-header { border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
             .print-pack-block { border-bottom: 1px solid #ccc; padding-bottom: 15px; margin-bottom: 15px; }
-            .print-pack-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
-            .print-issue-list { margin: 0; padding-left: 20px; }
+            .print-pack-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; color: black; }
+            .print-issue-list { margin: 0; padding-left: 20px; color: black; }
             .print-issue-list li { margin-bottom: 5px; }
+            h1, h2 { color: black !important; }
         }
         
         /* Mobile adjustment for sidebar */
@@ -172,9 +179,12 @@
             <option value="">Loading sites...</option>
         </select>
         
-        <div id="serviceTypeSelection" style="display: none; background: #f0f4f8; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #d0deeb;">
-            <p style="text-align: center; font-size: 1.2rem; font-weight: bold; margin-top: 0;">Site Selected. Choose an action:</p>
+        <div id="serviceTypeSelection" style="display: none; background: #1a1a1a; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border-color);">
+            <p style="text-align: center; font-size: 1.2rem; font-weight: bold; margin-top: 0; color: #fff;">Site Selected. Prepare for Service:</p>
             
+            <label style="margin-top: 10px;">Inspector Name:</label>
+            <input type="text" id="inspectorNameInput" placeholder="Enter your full name..." style="margin-bottom: 20px;">
+
             <div class="action-group" id="initialLoadGroup">
                 <button class="btn-primary" id="startNewServiceBtn">Start New Service</button>
                 <button class="btn-secondary" id="fetchDatesBtn">Load Previous Service</button>
@@ -194,10 +204,7 @@
             <div id="loadStatusMsg" style="text-align: center; font-weight: bold; margin-top: 10px;"></div>
         </div>
 
-        <div class="action-group" id="mainActionGroup">
-            <button class="btn-outline" id="toggleAdminBtn">⚙️ Manage Sites</button>
-            <button class="btn-outline" id="viewReportsBtn">📊 View Full Grid Report</button>
-        </div>
+        <button class="btn-outline" id="toggleAdminBtn">⚙️ Manage Sites Database</button>
     </div>
 
     <div id="adminSection" class="app-section">
@@ -207,7 +214,7 @@
             <p>Loading sites...</p>
         </div>
 
-        <hr style="border: 1px solid #eee; margin-bottom: 20px;">
+        <hr style="border: 1px solid var(--border-color); margin-bottom: 20px;">
         
         <h3>Add New Site</h3>
         <label>Site Name:</label>
@@ -215,16 +222,6 @@
         <label>Number of Packs:</label>
         <input type="number" id="newSiteCount" placeholder="e.g. 12">
         <button class="btn-primary" id="saveSiteBtn">Save New Site</button>
-    </div>
-
-    <div id="reportSection" class="app-section">
-        <h2>Master Site Grid Reports</h2>
-        <label for="reportSiteSelect">Select Site to View:</label>
-        <select id="reportSiteSelect">
-            <option value="">-- Choose Site --</option>
-        </select>
-        <button class="btn-primary" id="loadReportBtn">Generate Table</button>
-        <div id="tableContainer" class="table-responsive"></div>
     </div>
 
     <div id="serviceSection" class="app-section">
@@ -248,9 +245,8 @@
             <div class="service-sidebar">
                 <div class="sidebar-title">Service Controls</div>
                 
-                <button class="btn-outline" id="viewOverlayGridBtn" style="background: white;">📊 View Grid Overlay</button>
-                
-                <button class="btn-outline" id="sidebarPrintBtn" style="background: white; border-color: #333; color: #333;">🖨️ Print Active Report</button>
+                <button class="btn-outline" id="viewOverlayGridBtn">📊 View Grid Overlay</button>
+                <button class="btn-outline" id="sidebarPrintBtn">🖨️ Print Active Report</button>
                 
                 <label style="margin-top: 15px; font-size: 1.1rem;">General Site Notes</label>
                 <textarea id="sidebarSiteNotes" placeholder="Enter broad facility issues, missing packs, etc..."></textarea>
@@ -281,6 +277,7 @@
     // App State
     let sitesData = {}; 
     let currentSiteName = "";
+    let currentInspector = ""; 
     let activeServiceDate = ""; 
     let totalpacks = 0;
     let currentpackIndex = 1;
@@ -314,12 +311,11 @@
 
     document.getElementById('navHomeBtn').addEventListener('click', () => navigateTo('setupSection'));
     document.getElementById('toggleAdminBtn').addEventListener('click', () => navigateTo('adminSection'));
-    document.getElementById('viewReportsBtn').addEventListener('click', () => navigateTo('reportSection'));
 
     // --- 1. INITIALIZATION & SITES MANAGEMENT ---
     async function loadSites() {
-        const selects = ['siteSelect', 'reportSiteSelect'];
-        selects.forEach(id => document.getElementById(id).innerHTML = '<option value="">-- Choose Site --</option>');
+        const select = document.getElementById('siteSelect');
+        select.innerHTML = '<option value="">-- Choose Site --</option>';
         
         try {
             const querySnapshot = await getDocs(collection(db, "sites"));
@@ -329,10 +325,7 @@
                 const count = data.packCount || data.gearCount || 0; 
                 
                 sitesData[data.name] = { id: doc.id, count: count };
-                
-                selects.forEach(id => {
-                    document.getElementById(id).innerHTML += `<option value="${data.name}">${data.name} (${count} Packs)</option>`;
-                });
+                select.innerHTML += `<option value="${data.name}">${data.name} (${count} Packs)</option>`;
             });
         } catch (error) {
             console.error("Error loading sites: ", error);
@@ -350,7 +343,7 @@
             const itemDiv = document.createElement('div');
             itemDiv.className = 'site-manager-item';
             itemDiv.innerHTML = `
-                <div><strong>${siteName}</strong><br><span style="color: #666;">${siteInfo.count} Packs</span></div>
+                <div><strong>${siteName}</strong><br><span style="color: #aaa;">${siteInfo.count} Packs</span></div>
                 <div class="admin-controls">
                     <button class="admin-btn btn-edit" data-id="${siteInfo.id}" data-name="${siteName}" data-count="${siteInfo.count}">Edit</button>
                     <button class="admin-btn btn-del" data-id="${siteInfo.id}" data-name="${siteName}">Delete</button>
@@ -411,7 +404,7 @@
         } catch (error) { alert("Failed to save site."); }
     });
 
-    // --- 3. START / LOAD SERVICE FLOW (WITH DATES) ---
+    // --- 3. START / LOAD SERVICE FLOW ---
     document.getElementById('siteSelect').addEventListener('change', (e) => {
         currentSiteName = e.target.value;
         if (currentSiteName) {
@@ -426,6 +419,10 @@
     });
 
     document.getElementById('startNewServiceBtn').addEventListener('click', async () => {
+        const inspectorInput = document.getElementById('inspectorNameInput').value.trim();
+        if(!inspectorInput) return alert("Please enter the Inspector Name before starting.");
+        
+        currentInspector = inspectorInput;
         currentpackIndex = 1;
         packDataCache = {}; 
         activeServiceDate = new Date().toISOString().split('T')[0]; 
@@ -436,6 +433,10 @@
     });
 
     document.getElementById('fetchDatesBtn').addEventListener('click', async () => {
+        const inspectorInput = document.getElementById('inspectorNameInput').value.trim();
+        if(!inspectorInput) return alert("Please enter the Inspector Name before loading.");
+        
+        currentInspector = inspectorInput;
         const msg = document.getElementById('loadStatusMsg');
         msg.innerText = "Finding historical dates...";
         msg.style.color = "var(--primary)";
@@ -556,7 +557,8 @@
             <div class="print-header">
                 <h1>Service Issue Summary: ${currentSiteName}</h1>
                 <p><strong>Service Date:</strong> ${activeServiceDate}</p>
-                <p><strong>General Notes:</strong><br> ${generalNotes.replace(/\n/g, '<br>')}</p>
+                <p><strong>Inspector:</strong> ${currentInspector}</p>
+                <p><strong>General Site Notes:</strong><br> ${generalNotes.replace(/\n/g, '<br>')}</p>
             </div>
             <h2>Pack Issues Addressed:</h2>
         `;
@@ -590,7 +592,7 @@
         window.print();
     });
 
-    // --- 6. GRID REPORT LOGIC ---
+    // --- 6. SIDEBAR GRID OVERLAY LOGIC ---
     async function buildGridTable(site, containerElement) {
         containerElement.innerHTML = '<p style="text-align: center;">Fetching Live Data...</p>';
         try {
@@ -640,15 +642,6 @@
         }
     }
 
-    document.getElementById('loadReportBtn').addEventListener('click', async () => {
-        const site = document.getElementById('reportSiteSelect').value;
-        if (!site) return alert("Select a site first.");
-        const btn = document.getElementById('loadReportBtn');
-        btn.innerText = "Fetching Data...";
-        await buildGridTable(site, document.getElementById('tableContainer'));
-        btn.innerText = "Generate Table";
-    });
-
     document.getElementById('viewOverlayGridBtn').addEventListener('click', async () => {
         gridModal.style.display = "block";
         await buildGridTable(currentSiteName, document.getElementById('modalTableContainer'));
@@ -673,6 +666,7 @@
             await setDoc(doc(db, "services", docId), {
                 site: currentSiteName,
                 packId: `pack ${packToSave}`,
+                inspector: currentInspector, // Added Inspector to Cloud Data
                 serviceDetails: dataToSave,
                 lastUpdated: serverTimestamp()
             });
@@ -712,7 +706,7 @@
         if (changed) {
             isDirty = true;
             document.getElementById('saveIndicator').innerText = "Unsaved Changes...";
-            document.getElementById('saveIndicator').style.color = "var(--secondary)";
+            document.getElementById('saveIndicator').style.color = "#aaa";
             renderpackUI(); 
         }
     });
@@ -722,7 +716,7 @@
         document.getElementById('prevBtn').disabled = currentpackIndex === 1;
         document.getElementById('nextBtn').innerText = currentpackIndex === totalpacks ? "Finish" : "Next \u00BB";
         document.getElementById('saveIndicator').innerText = "Cloud Synced ✓";
-        document.getElementById('saveIndicator').style.color = "var(--secondary)";
+        document.getElementById('saveIndicator').style.color = "#aaa";
 
         if (!packDataCache[currentpackIndex]) {
             packDataCache[currentpackIndex] = {};
@@ -764,7 +758,7 @@
             btn.addEventListener('click', (e) => {
                 isDirty = true;
                 document.getElementById('saveIndicator').innerText = "Unsaved Changes...";
-                document.getElementById('saveIndicator').style.color = "var(--secondary)";
+                document.getElementById('saveIndicator').style.color = "#aaa";
 
                 const part = e.target.getAttribute('data-part');
                 const isGoodBtn = e.target.classList.contains('btn-good');
@@ -791,7 +785,7 @@
             ta.addEventListener('input', (e) => {
                 isDirty = true;
                 document.getElementById('saveIndicator').innerText = "Unsaved Changes...";
-                document.getElementById('saveIndicator').style.color = "var(--secondary)";
+                document.getElementById('saveIndicator').style.color = "#aaa";
                 
                 const part = e.target.getAttribute('data-part');
                 packDataCache[currentpackIndex][part].notes = e.target.value;
