@@ -59,6 +59,7 @@
         select, input, button:not(.home-btn):not(.admin-btn):not(.close-btn) {
             width: 100%; padding: 12px; font-size: 1.1rem; border-radius: 8px; border: 1px solid var(--border-color); 
             margin-bottom: 15px; box-sizing: border-box; background-color: var(--input-bg); color: var(--text-main);
+            color-scheme: dark; 
         }
         select:focus, input:focus, textarea:focus { outline: 2px solid var(--primary); border-color: transparent; }
         
@@ -116,9 +117,11 @@
         .button-group { display: flex; gap: 8px; }
         .btn-good, .btn-issue { flex: 1; padding: 10px; color: white; border: none; cursor: pointer; font-weight: bold; transition: opacity 0.2s; border-radius: 6px; font-size: 1rem; }
         .btn-good { background-color: var(--secondary); }
-        .btn-good.active { background-color: var(--success); }
         .btn-issue { background-color: var(--secondary); }
-        .btn-issue.active { background-color: var(--danger); }
+        
+        /* GUARANTEED ACTIVE COLORS */
+        .btn-good.active { background-color: var(--success) !important; color: white !important; box-shadow: inset 0 0 8px rgba(0,0,0,0.4);}
+        .btn-issue.active { background-color: var(--danger) !important; color: white !important; box-shadow: inset 0 0 8px rgba(0,0,0,0.4);}
         
         .notes-area { display: none; margin-top: 10px; }
         .notes-area.visible { display: block; }
@@ -182,8 +185,8 @@
         <div id="serviceTypeSelection" style="display: none; background: #1a1a1a; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border-color);">
             <p style="text-align: center; font-size: 1.2rem; font-weight: bold; margin-top: 0; color: #fff;">Site Selected. Prepare for Service:</p>
             
-            <label style="margin-top: 10px;">Inspector Name:</label>
-            <input type="text" id="inspectorNameInput" placeholder="Enter your full name..." style="margin-bottom: 20px;">
+            <label style="margin-top: 10px;">Representative Name:</label>
+            <input type="text" id="RepresentativeNameInput" placeholder="Enter your name" style="margin-bottom: 20px;">
 
             <div class="action-group" id="initialLoadGroup">
                 <button class="btn-primary" id="startNewServiceBtn">Start New Service</button>
@@ -277,7 +280,7 @@
     // App State
     let sitesData = {}; 
     let currentSiteName = "";
-    let currentInspector = ""; 
+    let currentRepresentative = ""; 
     let activeServiceDate = ""; 
     let totalpacks = 0;
     let currentpackIndex = 1;
@@ -419,10 +422,10 @@
     });
 
     document.getElementById('startNewServiceBtn').addEventListener('click', async () => {
-        const inspectorInput = document.getElementById('inspectorNameInput').value.trim();
-        if(!inspectorInput) return alert("Please enter the Inspector Name before starting.");
+        const RepresentativeInput = document.getElementById('RepresentativeNameInput').value.trim();
+        if(!RepresentativeInput) return alert("Please enter the Representative Name before starting.");
         
-        currentInspector = inspectorInput;
+        currentRepresentative = RepresentativeInput;
         currentpackIndex = 1;
         packDataCache = {}; 
         activeServiceDate = new Date().toISOString().split('T')[0]; 
@@ -433,10 +436,10 @@
     });
 
     document.getElementById('fetchDatesBtn').addEventListener('click', async () => {
-        const inspectorInput = document.getElementById('inspectorNameInput').value.trim();
-        if(!inspectorInput) return alert("Please enter the Inspector Name before loading.");
+        const RepresentativeInput = document.getElementById('RepresentativeNameInput').value.trim();
+        if(!RepresentativeInput) return alert("Please enter the Representative Name before loading.");
         
-        currentInspector = inspectorInput;
+        currentRepresentative = RepresentativeInput;
         const msg = document.getElementById('loadStatusMsg');
         msg.innerText = "Finding historical dates...";
         msg.style.color = "var(--primary)";
@@ -510,14 +513,15 @@
         renderpackUI();
     });
 
-    // --- 4. SIDEBAR SITE NOTES LOGIC ---
+    // --- 4. DATE-SPECIFIC SITE NOTES LOGIC ---
     async function loadSidebarNotes() {
         const textArea = document.getElementById('sidebarSiteNotes');
         textArea.value = "Loading notes...";
         textArea.disabled = true;
 
         try {
-            const docRef = doc(db, "site_notes", currentSiteName.replace(/\s+/g, '-'));
+            const docId = `${currentSiteName.replace(/\s+/g, '-')}-${activeServiceDate}`;
+            const docRef = doc(db, "site_notes", docId);
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) textArea.value = docSnap.data().notes || "";
             else textArea.value = "";
@@ -534,7 +538,8 @@
 
         btn.innerText = "Saving...";
         try {
-            const docRef = doc(db, "site_notes", currentSiteName.replace(/\s+/g, '-'));
+            const docId = `${currentSiteName.replace(/\s+/g, '-')}-${activeServiceDate}`;
+            const docRef = doc(db, "site_notes", docId);
             await setDoc(docRef, { notes: notes, lastUpdated: serverTimestamp() }, { merge: true });
             msg.innerText = "Saved ✓";
             msg.style.color = "var(--success)";
@@ -552,12 +557,27 @@
 
         const printArea = document.getElementById('printOnlyArea');
         const generalNotes = document.getElementById('sidebarSiteNotes').value || "None recorded.";
+        
+        // Calculate Next Service Due (9 months from activeServiceDate)
+        let nextDueDateStr = "N/A";
+        if (activeServiceDate) {
+            const dateParts = activeServiceDate.split('-');
+            if (dateParts.length === 3) {
+                const year = parseInt(dateParts[0], 10);
+                const month = parseInt(dateParts[1], 10) - 1; // JS months are 0-indexed
+                const day = parseInt(dateParts[2], 10);
+                
+                const nextDateObj = new Date(year, month + 9, day);
+                nextDueDateStr = nextDateObj.toISOString().split('T')[0];
+            }
+        }
 
         let html = `
             <div class="print-header">
                 <h1>Service Issue Summary: ${currentSiteName}</h1>
                 <p><strong>Service Date:</strong> ${activeServiceDate}</p>
-                <p><strong>Inspector:</strong> ${currentInspector}</p>
+                <p><strong>Next Service Due:</strong> ${nextDueDateStr}</p>
+                <p><strong>Representative:</strong> ${currentRepresentative}</p>
                 <p><strong>General Site Notes:</strong><br> ${generalNotes.replace(/\n/g, '<br>')}</p>
             </div>
             <h2>Pack Issues Addressed:</h2>
@@ -577,7 +597,7 @@
                     html += `<ul class="print-issue-list">`;
                     issues.forEach(part => {
                         const noteText = parts[part].notes ? ` - <em>${parts[part].notes}</em>` : "";
-                        html += `<li><strong>${part}:</strong> Issue logged${noteText}</li>`;
+                        html += `<li><strong>${part}:</strong> ${noteText}</li>`;
                     });
                     html += `</ul></div>`;
                 }
@@ -602,8 +622,10 @@
             const serviceMap = {};
             querySnapshot.forEach(doc => {
                 const data = doc.data();
-                if (!serviceMap[data.packId] || (data.lastUpdated > serviceMap[data.packId].lastUpdated)) {
-                    serviceMap[data.packId] = data;
+                if (doc.id.includes(activeServiceDate)) {
+                    if (!serviceMap[data.packId] || (data.lastUpdated > serviceMap[data.packId].lastUpdated)) {
+                        serviceMap[data.packId] = data;
+                    }
                 }
             });
 
@@ -662,11 +684,26 @@
         try {
             const safeSiteName = currentSiteName.replace(/\s+/g, '-');
             const docId = `${safeSiteName}-${activeServiceDate}-pack-${packToSave}`;
+            
+            // Re-calculate Next Due Date to explicitly save it in the database
+            let nextDueDateStr = "";
+            if (activeServiceDate) {
+                const dateParts = activeServiceDate.split('-');
+                if (dateParts.length === 3) {
+                    const year = parseInt(dateParts[0], 10);
+                    const month = parseInt(dateParts[1], 10) - 1; 
+                    const day = parseInt(dateParts[2], 10);
+                    const nextDateObj = new Date(year, month + 9, day);
+                    nextDueDateStr = nextDateObj.toISOString().split('T')[0];
+                }
+            }
 
             await setDoc(doc(db, "services", docId), {
                 site: currentSiteName,
                 packId: `pack ${packToSave}`,
-                inspector: currentInspector, // Added Inspector to Cloud Data
+                representative: currentRepresentative,
+                serviceDate: activeServiceDate,
+                nextServiceDue: nextDueDateStr, // Now saved securely in the cloud!
                 serviceDetails: dataToSave,
                 lastUpdated: serverTimestamp()
             });
@@ -737,7 +774,7 @@
                 <div class="part-header">${part}</div>
                 <div class="button-group">
                     <button class="btn-good ${partData.status === 'Good' ? 'active' : ''}" data-part="${part}">All Good</button>
-                    <button class="btn-issue ${partData.status === 'Issue' ? 'active' : ''}" data-part="${part}">Needs Fix</button>
+                    <button class="btn-issue ${partData.status === 'Issue' ? 'active' : ''}" data-part="${part}">Issue</button>
                 </div>
                 <div class="notes-area ${partData.status === 'Issue' ? 'visible' : ''}" id="notes-${partId}">
                     <label>What is wrong & what was fixed?</label>
