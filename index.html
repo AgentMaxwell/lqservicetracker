@@ -23,37 +23,37 @@
         }
         
         .container {
-            max-width: 1000px; /* Accommodates sidebar */
-            margin: 20px auto;
+            max-width: 1100px; /* Widened slightly to maximize landscape tablet space */
+            margin: 15px auto;
             background: var(--card-bg);
-            padding: 30px;
+            padding: 20px 30px;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
         
-        /* New App Header with Home Button */
+        /* App Header with Home Button */
         .app-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
             border-bottom: 2px solid #eef2f5;
         }
-        .app-header h1 { margin: 0; text-align: center; flex: 1; color: var(--primary); }
+        .app-header h1 { margin: 0; text-align: center; flex: 1; color: var(--primary); font-size: 1.8rem;}
         .home-btn {
             background-color: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer;
-            padding: 12px 20px; font-size: 1.1rem; border-radius: 8px; width: auto; margin: 0;
+            padding: 10px 18px; font-size: 1rem; border-radius: 8px; width: auto; margin: 0;
         }
         .home-btn:active { background-color: #004080; }
-        .header-spacer { width: 100px; } /* Keeps the title perfectly centered */
+        .header-spacer { width: 90px; } /* Keeps the title perfectly centered */
 
-        h2, h3 { text-align: center; color: var(--primary); margin-top: 0;}
+        h2, h3 { text-align: center; color: var(--primary); margin-top: 0; margin-bottom: 15px;}
         
         /* Form Elements */
-        label { font-weight: bold; display: block; margin-bottom: 8px; font-size: 1.2rem;}
+        label { font-weight: bold; display: block; margin-bottom: 6px; font-size: 1.1rem;}
         select, input, button:not(.home-btn):not(.admin-btn):not(.close-btn) {
-            width: 100%; padding: 15px; font-size: 1.2rem; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 20px; box-sizing: border-box;
+            width: 100%; padding: 12px; font-size: 1.1rem; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 15px; box-sizing: border-box;
         }
         .btn-primary { background-color: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer;}
         .btn-primary:active { background-color: #004080; }
@@ -72,60 +72,68 @@
         /* Admin Management List */
         .site-manager-item {
             display: flex; justify-content: space-between; align-items: center;
-            background: #f9f9f9; border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 10px;
+            background: #f9f9f9; border: 1px solid #ddd; padding: 12px; border-radius: 8px; margin-bottom: 10px;
         }
-        .site-manager-item strong { font-size: 1.2rem; }
-        .admin-controls { display: flex; gap: 10px; }
-        .admin-btn { padding: 10px 15px; font-size: 1rem; border-radius: 6px; cursor: pointer; border: none; color: white;}
+        .site-manager-item strong { font-size: 1.1rem; }
+        .admin-controls { display: flex; gap: 8px; }
+        .admin-btn { padding: 8px 12px; font-size: 0.95rem; border-radius: 6px; cursor: pointer; border: none; color: white;}
         .btn-edit { background-color: #ffc107; color: #333; font-weight: bold;}
         .btn-del { background-color: var(--danger); font-weight: bold;}
 
         /* --- ACTIVE SERVICE LAYOUT (Sidebar & Main Content) --- */
-        .service-layout { display: flex; gap: 20px; align-items: flex-start; }
-        .service-main { flex: 2; min-width: 0; }
+        .service-layout { display: flex; gap: 15px; align-items: flex-start; }
+        .service-main { flex: 2.5; min-width: 0; } /* Gave main content more relative space */
         .service-sidebar { 
-            flex: 1; background: #f0f4f8; padding: 20px; border-radius: 8px; border: 1px solid #d0deeb; min-width: 0; position: sticky; top: 20px;
+            flex: 1; background: #f0f4f8; padding: 15px; border-radius: 8px; border: 1px solid #d0deeb; min-width: 0; position: sticky; top: 15px;
         }
         
         /* Sidebar Elements */
-        .sidebar-title { font-size: 1.3rem; font-weight: bold; color: var(--primary); margin-bottom: 15px; text-align: center; border-bottom: 2px solid var(--primary); padding-bottom: 5px; }
-        .service-sidebar textarea { width: 100%; height: 180px; padding: 10px; font-size: 1rem; border-radius: 8px; border: 1px solid #ccc; resize: vertical; margin-bottom: 10px; box-sizing: border-box; }
-        .service-sidebar button { padding: 12px; font-size: 1.1rem; margin-bottom: 10px; }
+        .sidebar-title { font-size: 1.2rem; font-weight: bold; color: var(--primary); margin-bottom: 12px; text-align: center; border-bottom: 2px solid var(--primary); padding-bottom: 5px; }
+        .service-sidebar textarea { width: 100%; height: 140px; padding: 10px; font-size: 1rem; border-radius: 8px; border: 1px solid #ccc; resize: vertical; margin-bottom: 10px; box-sizing: border-box; }
+        .service-sidebar button { padding: 10px; font-size: 1.05rem; margin-bottom: 8px; }
 
-        /* Navigation Controls */
-        .nav-controls { display: flex; justify-content: space-between; align-items: center; background: #eef2f5; padding: 15px; border-radius: 8px; margin-bottom: 20px; gap: 15px; }
-        .nav-controls button { flex: 1; max-width: 150px; margin: 0; padding: 15px 10px; font-size: 1.1rem; }
-        .nav-status { flex: 2; display: flex; flex-direction: column; justify-content: center; text-align: center; font-size: 1.4rem; font-weight: bold; }
-        .save-indicator { font-size: 0.9rem; color: var(--secondary); display: block; margin-top: 5px; font-weight: normal;}
+        /* Navigation Controls (Condensed) */
+        .nav-controls { display: flex; justify-content: space-between; align-items: center; background: #eef2f5; padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; gap: 15px; }
+        .nav-controls button { flex: 1; max-width: 120px; margin: 0; padding: 10px; font-size: 1.05rem; }
+        .nav-status { flex: 2; display: flex; flex-direction: column; justify-content: center; text-align: center; font-size: 1.2rem; font-weight: bold; }
+        .save-indicator { font-size: 0.85rem; color: var(--secondary); display: block; margin-top: 2px; font-weight: normal;}
         
-        /* Pack Parts Checklist */
-        .part-section { border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: #fafafa; }
-        .part-header { font-size: 1.3rem; font-weight: bold; margin-bottom: 10px; }
-        .button-group { display: flex; gap: 10px; }
-        .btn-good, .btn-issue { flex: 1; padding: 15px; color: white; border: none; cursor: pointer; font-weight: bold; transition: opacity 0.2s; border-radius: 8px; }
+        /* --- PACK PARTS CHECKLIST (LANDSCAPE GRID OPTIMIZATION) --- */
+        #packAllOkBtn { padding: 12px; margin-bottom: 15px; font-size: 1.1rem; }
+        
+        #partsContainer {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); /* Creates side-by-side columns automatically */
+            gap: 12px; /* Tighter gap between grid items */
+        }
+
+        .part-section { border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px; margin-bottom: 0; background: #fafafa; }
+        .part-header { font-size: 1.1rem; font-weight: bold; margin-bottom: 8px; text-align: center; }
+        .button-group { display: flex; gap: 8px; }
+        .btn-good, .btn-issue { flex: 1; padding: 10px; color: white; border: none; cursor: pointer; font-weight: bold; transition: opacity 0.2s; border-radius: 6px; font-size: 1rem; }
         .btn-good { background-color: var(--secondary); }
         .btn-good.active { background-color: var(--success); }
         .btn-issue { background-color: var(--secondary); }
         .btn-issue.active { background-color: var(--danger); }
         
-        .notes-area { display: none; margin-top: 15px; }
+        .notes-area { display: none; margin-top: 10px; }
         .notes-area.visible { display: block; }
-        .notes-area textarea { width: 100%; height: 100px; padding: 12px; font-size: 1.1rem; border-radius: 8px; border: 1px solid #ccc; resize: vertical; box-sizing: border-box; }
+        .notes-area textarea { width: 100%; height: 75px; padding: 8px; font-size: 1rem; border-radius: 6px; border: 1px solid #ccc; resize: vertical; box-sizing: border-box; }
 
         /* Report Table Styles */
-        .table-responsive { overflow-x: auto; margin-top: 20px; border-radius: 8px; border: 1px solid #ddd; }
+        .table-responsive { overflow-x: auto; margin-top: 15px; border-radius: 8px; border: 1px solid #ddd; }
         table { width: 100%; border-collapse: collapse; min-width: 700px; }
-        th, td { border-bottom: 1px solid #ddd; padding: 15px 10px; text-align: center; }
-        th { background-color: var(--primary); color: white; font-size: 1.1rem; }
+        th, td { border-bottom: 1px solid #ddd; padding: 12px 10px; text-align: center; }
+        th { background-color: var(--primary); color: white; font-size: 1.05rem; }
         tr:nth-child(even) { background-color: #f9f9f9; }
-        .tick { color: var(--success); font-size: 1.5rem; font-weight: bold;}
-        .cross { color: var(--danger); font-size: 1.5rem; font-weight: bold;}
-        .pending { color: #999; font-style: italic; }
-        .notes-cell { text-align: left; font-size: 0.95rem; color: var(--danger); max-width: 250px; }
+        .tick { color: var(--success); font-size: 1.4rem; font-weight: bold;}
+        .cross { color: var(--danger); font-size: 1.4rem; font-weight: bold;}
+        .pending { color: #999; font-style: italic; font-size: 0.95rem; }
+        .notes-cell { text-align: left; font-size: 0.9rem; color: var(--danger); max-width: 250px; }
 
         /* Modal / Overlay Styles */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(3px); }
-        .modal-content { background-color: var(--card-bg); margin: 5% auto; padding: 30px; border-radius: 12px; width: 95%; max-width: 1000px; max-height: 85vh; overflow-y: auto; box-shadow: 0 5px 25px rgba(0,0,0,0.2); position: relative; }
+        .modal-content { background-color: var(--card-bg); margin: 3% auto; padding: 25px; border-radius: 12px; width: 95%; max-width: 1000px; max-height: 90vh; overflow-y: auto; box-shadow: 0 5px 25px rgba(0,0,0,0.2); position: relative; }
         .close-btn { position: absolute; top: 15px; right: 20px; color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; line-height: 1; }
         .close-btn:hover, .close-btn:focus { color: #000; text-decoration: none; cursor: pointer; }
 
@@ -273,7 +281,7 @@
     // App State
     let sitesData = {}; 
     let currentSiteName = "";
-    let activeServiceDate = ""; // Tracks if we are working on "today" or a historical date
+    let activeServiceDate = ""; 
     let totalpacks = 0;
     let currentpackIndex = 1;
     let packDataCache = {}; 
@@ -420,7 +428,7 @@
     document.getElementById('startNewServiceBtn').addEventListener('click', async () => {
         currentpackIndex = 1;
         packDataCache = {}; 
-        activeServiceDate = new Date().toISOString().split('T')[0]; // Set date to today
+        activeServiceDate = new Date().toISOString().split('T')[0]; 
         
         await loadSidebarNotes(); 
         navigateTo('serviceSection');
@@ -476,7 +484,7 @@
         const selectedDate = document.getElementById('serviceDateSelect').value;
         if (!selectedDate) return alert("Select a date.");
 
-        activeServiceDate = selectedDate; // Set active date to historical date
+        activeServiceDate = selectedDate; 
 
         const serviceMap = {};
         fetchedServiceDocs.forEach(record => {
@@ -539,7 +547,6 @@
 
     // --- 5. SIDEBAR PRINT REPORT LOGIC ---
     document.getElementById('sidebarPrintBtn').addEventListener('click', async () => {
-        // Force a save of whatever is currently unsaved on screen
         await triggerBackgroundSave();
 
         const printArea = document.getElementById('printOnlyArea');
@@ -556,7 +563,6 @@
 
         let hasIssues = false;
 
-        // Loop through the local cache to find the issues instantly
         for (let i = 1; i <= totalpacks; i++) {
             if (packDataCache[i]) {
                 const parts = packDataCache[i];
@@ -594,7 +600,6 @@
             const serviceMap = {};
             querySnapshot.forEach(doc => {
                 const data = doc.data();
-                // If viewing history, we could filter by date, but Master Grid implies all latest data
                 if (!serviceMap[data.packId] || (data.lastUpdated > serviceMap[data.packId].lastUpdated)) {
                     serviceMap[data.packId] = data;
                 }
@@ -605,7 +610,6 @@
 
             for (let i = 1; i <= total; i++) {
                 let recordData = null;
-                // Merge unsaved cache if viewing active site
                 if (site === currentSiteName && packDataCache[i] && Object.keys(packDataCache[i]).some(p => packDataCache[i][p].status !== null)) {
                     recordData = packDataCache[i];
                 } else if (serviceMap[`pack ${i}`]) {
@@ -636,7 +640,6 @@
         }
     }
 
-    // Master Grid Button
     document.getElementById('loadReportBtn').addEventListener('click', async () => {
         const site = document.getElementById('reportSiteSelect').value;
         if (!site) return alert("Select a site first.");
@@ -646,7 +649,6 @@
         btn.innerText = "Generate Table";
     });
 
-    // Sidebar Modal Grid
     document.getElementById('viewOverlayGridBtn').addEventListener('click', async () => {
         gridModal.style.display = "block";
         await buildGridTable(currentSiteName, document.getElementById('modalTableContainer'));
@@ -666,8 +668,6 @@
 
         try {
             const safeSiteName = currentSiteName.replace(/\s+/g, '-');
-            
-            // Uses activeServiceDate (either today or chosen history date) instead of forcing today!
             const docId = `${safeSiteName}-${activeServiceDate}-pack-${packToSave}`;
 
             await setDoc(doc(db, "services", docId), {
