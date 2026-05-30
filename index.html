@@ -51,7 +51,7 @@
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1000px; /* Slightly wider to accommodate sidebar */
             margin: 20px auto;
             background: var(--card-bg);
             padding: 30px;
@@ -62,7 +62,7 @@
         
         /* Form Elements */
         label { font-weight: bold; display: block; margin-bottom: 8px; font-size: 1.2rem;}
-        select, input, button:not(.top-nav button):not(.admin-btn) {
+        select, input, button:not(.top-nav button):not(.admin-btn):not(.close-btn) {
             width: 100%; padding: 15px; font-size: 1.2rem; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 20px; box-sizing: border-box;
         }
         .btn-primary { background-color: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer;}
@@ -90,40 +90,36 @@
         .btn-edit { background-color: #ffc107; color: #333; font-weight: bold;}
         .btn-del { background-color: var(--danger); font-weight: bold;}
 
-        /* --- FIXED NAVIGATION CONTROLS --- */
-        .nav-controls {
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            background: #eef2f5; 
-            padding: 15px; 
-            border-radius: 8px; 
-            margin-bottom: 20px; 
-            gap: 15px; /* Adds breathing room between buttons and text */
-        }
-        .nav-controls button { 
-            flex: 1; /* Allows buttons to size dynamically */
-            max-width: 150px; /* Prevents them from getting too wide */
-            margin: 0; 
-            padding: 15px 10px; 
-            font-size: 1.1rem;
-        }
-        .nav-status { 
-            flex: 2; /* Forces text to take up the bulk of the middle space */
+        /* --- ACTIVE SERVICE LAYOUT (Sidebar & Main Content) --- */
+        .service-layout {
             display: flex;
-            flex-direction: column;
-            justify-content: center;
-            text-align: center; 
-            font-size: 1.4rem; 
-            font-weight: bold; 
+            gap: 20px;
+            align-items: flex-start;
         }
-        .save-indicator { 
-            font-size: 0.9rem; 
-            color: var(--secondary); 
-            display: block; 
-            margin-top: 5px; 
-            font-weight: normal;
+        .service-main { flex: 2; min-width: 0; }
+        .service-sidebar { 
+            flex: 1; 
+            background: #f0f4f8; 
+            padding: 20px; 
+            border-radius: 8px; 
+            border: 1px solid #d0deeb; 
+            min-width: 0;
+            position: sticky;
+            top: 20px;
         }
+        
+        /* Sidebar Elements */
+        .sidebar-title { font-size: 1.3rem; font-weight: bold; color: var(--primary); margin-bottom: 15px; text-align: center; border-bottom: 2px solid var(--primary); padding-bottom: 5px; }
+        .service-sidebar textarea { width: 100%; height: 180px; padding: 10px; font-size: 1rem; border-radius: 8px; border: 1px solid #ccc; resize: vertical; margin-bottom: 10px; box-sizing: border-box; }
+        .service-sidebar button { padding: 12px; font-size: 1.1rem; margin-bottom: 10px; }
+
+        /* Navigation Controls */
+        .nav-controls {
+            display: flex; justify-content: space-between; align-items: center; background: #eef2f5; padding: 15px; border-radius: 8px; margin-bottom: 20px; gap: 15px;
+        }
+        .nav-controls button { flex: 1; max-width: 150px; margin: 0; padding: 15px 10px; font-size: 1.1rem; }
+        .nav-status { flex: 2; display: flex; flex-direction: column; justify-content: center; text-align: center; font-size: 1.4rem; font-weight: bold; }
+        .save-indicator { font-size: 0.9rem; color: var(--secondary); display: block; margin-top: 5px; font-weight: normal;}
         
         /* Pack Parts Checklist */
         .part-section { border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: #fafafa; }
@@ -137,7 +133,7 @@
         
         .notes-area { display: none; margin-top: 15px; }
         .notes-area.visible { display: block; }
-        textarea { width: 100%; height: 100px; padding: 12px; font-size: 1.1rem; border-radius: 8px; border: 1px solid #ccc; resize: vertical; box-sizing: border-box; }
+        .notes-area textarea { width: 100%; height: 100px; padding: 12px; font-size: 1.1rem; border-radius: 8px; border: 1px solid #ccc; resize: vertical; box-sizing: border-box; }
 
         /* Report Table Styles */
         .table-responsive { overflow-x: auto; margin-top: 20px; border-radius: 8px; border: 1px solid #ddd; }
@@ -149,6 +145,12 @@
         .cross { color: var(--danger); font-size: 1.5rem; font-weight: bold;}
         .pending { color: #999; font-style: italic; }
         .notes-cell { text-align: left; font-size: 0.95rem; color: var(--danger); max-width: 250px; }
+
+        /* Modal / Overlay Styles */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(3px); }
+        .modal-content { background-color: var(--card-bg); margin: 5% auto; padding: 30px; border-radius: 12px; width: 95%; max-width: 1000px; max-height: 85vh; overflow-y: auto; box-shadow: 0 5px 25px rgba(0,0,0,0.2); position: relative; }
+        .close-btn { position: absolute; top: 15px; right: 20px; color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; line-height: 1; }
+        .close-btn:hover, .close-btn:focus { color: #000; text-decoration: none; cursor: pointer; }
 
         /* Print Specific Styles */
         #printOnlyArea { display: none; }
@@ -162,14 +164,20 @@
             .print-issue-list { margin: 0; padding-left: 20px; }
             .print-issue-list li { margin-bottom: 5px; }
         }
+        
+        /* Mobile adjustment for sidebar */
+        @media (max-width: 768px) {
+            .service-layout { flex-direction: column; }
+            .service-sidebar { width: 100%; position: static; }
+        }
     </style>
 </head>
 <body>
 
 <nav class="top-nav">
     <button id="navHome" class="active">🏠 Home</button>
-    <button id="navSiteNotes">📝 Site Notes</button>
     <button id="navPrintReport">🖨️ Print Report</button>
+    <button id="navGridReport">📊 Master Grid</button>
 </nav>
 
 <div class="container">
@@ -203,10 +211,7 @@
             <div id="loadStatusMsg" style="text-align: center; font-weight: bold; margin-top: 10px;"></div>
         </div>
 
-        <div class="action-group" id="mainActionGroup">
-            <button class="btn-outline" id="toggleAdminBtn">⚙️ Manage Sites</button>
-            <button class="btn-outline" id="viewReportsBtn">📊 View Full Grid Report</button>
-        </div>
+        <button class="btn-outline" id="toggleAdminBtn">⚙️ Manage Sites</button>
     </div>
 
     <div id="adminSection" class="app-section">
@@ -226,22 +231,6 @@
         <button class="btn-primary" id="saveSiteBtn">Save New Site</button>
     </div>
 
-    <div id="siteNotesSection" class="app-section">
-        <h2>General Site Notes</h2>
-        <p style="color: #666; text-align: center;">Record general facility issues, missing packs, or broad observations not tied to a specific pack.</p>
-        <label for="noteSiteSelect">Select Site:</label>
-        <select id="noteSiteSelect">
-            <option value="">-- Choose Site --</option>
-        </select>
-        
-        <div id="notesEditArea" style="display: none;">
-            <label>Notes for this site:</label>
-            <textarea id="generalSiteNotes" style="height: 200px;" placeholder="Enter general site notes here..."></textarea>
-            <button class="btn-primary" id="saveSiteNotesBtn">Save Site Notes</button>
-            <div id="notesStatusMsg" style="text-align: center; font-weight: bold; margin-top: 10px;"></div>
-        </div>
-    </div>
-
     <div id="printReportSection" class="app-section">
         <h2>Print Issues Summary</h2>
         <p style="color: #666; text-align: center;">Generate a clean, printer-friendly list of only the pack that requires fixing.</p>
@@ -254,7 +243,7 @@
     </div>
 
     <div id="reportSection" class="app-section">
-        <h2>Site Grid Reports</h2>
+        <h2>Master Site Grid Reports</h2>
         <label for="reportSiteSelect">Select Site to View:</label>
         <select id="reportSiteSelect">
             <option value="">-- Choose Site --</option>
@@ -264,18 +253,45 @@
     </div>
 
     <div id="serviceSection" class="app-section">
-        <div class="nav-controls">
-            <button class="btn-primary" id="prevBtn" disabled>&laquo; Back</button>
-            <div class="nav-status">
-                <div id="packCounter">Pack 1 of X</div>
-                <div class="save-indicator" id="saveIndicator">Cloud Synced ✓</div>
+        <div class="service-layout">
+            
+            <div class="service-main">
+                <div class="nav-controls">
+                    <button class="btn-primary" id="prevBtn" disabled>&laquo; Back</button>
+                    <div class="nav-status">
+                        <div id="packCounter">Pack 1 of X</div>
+                        <div class="save-indicator" id="saveIndicator">Cloud Synced ✓</div>
+                    </div>
+                    <button class="btn-primary" id="nextBtn">Next &raquo;</button>
+                </div>
+
+                <button class="btn-success" id="packAllOkBtn">✔ Mark Remaining Parts as "All Good"</button>
+
+                <div id="partsContainer"></div>
             </div>
-            <button class="btn-primary" id="nextBtn">Next &raquo;</button>
+
+            <div class="service-sidebar">
+                <div class="sidebar-title">Global Controls</div>
+                
+                <button class="btn-outline" id="viewOverlayGridBtn" style="background: white;">📊 View Grid Overlay</button>
+                
+                <label style="margin-top: 15px; font-size: 1.1rem;">General Site Notes</label>
+                <textarea id="sidebarSiteNotes" placeholder="Enter broad facility issues, missing packs, etc..."></textarea>
+                <button class="btn-primary" id="saveSidebarNotesBtn" style="padding: 10px; font-size: 1rem;">Save Notes</button>
+                <div id="sidebarNotesMsg" style="text-align: center; font-weight: bold; font-size: 0.9rem;"></div>
+            </div>
+
         </div>
+    </div>
+</div>
 
-        <button class="btn-success" id="packAllOkBtn">✔ Mark Remaining Parts as "All Good"</button>
-
-        <div id="partsContainer"></div>
+<div id="gridOverlayModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" id="closeModalBtn">&times;</span>
+        <h2 style="margin-top: 0;">Live Service Grid</h2>
+        <div id="modalTableContainer" class="table-responsive">
+            <p style="text-align: center;">Loading data...</p>
+        </div>
     </div>
 </div>
 
@@ -291,14 +307,15 @@
     let totalpacks = 0;
     let currentpackIndex = 1;
     let packDataCache = {}; 
-    let fetchedServiceDocs = []; // Holds cloud data for date filtering
+    let fetchedServiceDocs = []; 
     let isDirty = false;    
     const partsList = ["Right Shoulder", "Left Shoulder", "Front", "Back", "Gun"];
 
-    // DOM Elements - Navigation
+    // DOM Elements
     const navButtons = document.querySelectorAll('.top-nav button');
     const sections = document.querySelectorAll('.app-section');
     const serviceTypeSelection = document.getElementById('serviceTypeSelection');
+    const gridModal = document.getElementById('gridOverlayModal');
     
     // --- 0. MENU NAVIGATION LOGIC ---
     async function navigateTo(sectionId, clickedBtnId) {
@@ -315,7 +332,6 @@
         document.getElementById('siteSelect').value = "";
         serviceTypeSelection.style.display = 'none';
         
-        // Reset sub-menus
         document.getElementById('initialLoadGroup').style.display = 'flex';
         document.getElementById('dateSelectionUI').style.display = 'none';
         
@@ -323,14 +339,13 @@
     }
 
     document.getElementById('navHome').addEventListener('click', () => navigateTo('setupSection', 'navHome'));
-    document.getElementById('navSiteNotes').addEventListener('click', () => navigateTo('siteNotesSection', 'navSiteNotes'));
     document.getElementById('navPrintReport').addEventListener('click', () => navigateTo('printReportSection', 'navPrintReport'));
-    document.getElementById('viewReportsBtn').addEventListener('click', () => navigateTo('reportSection', null));
+    document.getElementById('navGridReport').addEventListener('click', () => navigateTo('reportSection', 'navGridReport'));
     document.getElementById('toggleAdminBtn').addEventListener('click', () => navigateTo('adminSection', null));
 
     // --- 1. INITIALIZATION & SITES MANAGEMENT ---
     async function loadSites() {
-        const selects = ['siteSelect', 'reportSiteSelect', 'noteSiteSelect', 'printSiteSelect'];
+        const selects = ['siteSelect', 'reportSiteSelect', 'printSiteSelect'];
         selects.forEach(id => document.getElementById(id).innerHTML = '<option value="">-- Choose Site --</option>');
         
         try {
@@ -355,22 +370,14 @@
     function renderAdminList() {
         const listDiv = document.getElementById('adminSiteList');
         listDiv.innerHTML = '';
-
-        if (Object.keys(sitesData).length === 0) {
-            listDiv.innerHTML = '<p>No sites found. Add one below!</p>';
-            return;
-        }
+        if (Object.keys(sitesData).length === 0) { listDiv.innerHTML = '<p>No sites found. Add one below!</p>'; return; }
 
         Object.keys(sitesData).forEach(siteName => {
             const siteInfo = sitesData[siteName];
-            
             const itemDiv = document.createElement('div');
             itemDiv.className = 'site-manager-item';
             itemDiv.innerHTML = `
-                <div>
-                    <strong>${siteName}</strong><br>
-                    <span style="color: #666;">${siteInfo.count} Packs</span>
-                </div>
+                <div><strong>${siteName}</strong><br><span style="color: #666;">${siteInfo.count} Packs</span></div>
                 <div class="admin-controls">
                     <button class="admin-btn btn-edit" data-id="${siteInfo.id}" data-name="${siteName}" data-count="${siteInfo.count}">Edit</button>
                     <button class="admin-btn btn-del" data-id="${siteInfo.id}" data-name="${siteName}">Delete</button>
@@ -379,66 +386,46 @@
             listDiv.appendChild(itemDiv);
         });
 
-        document.querySelectorAll('.btn-edit').forEach(btn => {
-            btn.addEventListener('click', handleEditSite);
-        });
-        document.querySelectorAll('.btn-del').forEach(btn => {
-            btn.addEventListener('click', handleDeleteSite);
-        });
+        document.querySelectorAll('.btn-edit').forEach(btn => btn.addEventListener('click', handleEditSite));
+        document.querySelectorAll('.btn-del').forEach(btn => btn.addEventListener('click', handleDeleteSite));
     }
 
     async function handleEditSite(e) {
         const docId = e.target.getAttribute('data-id');
         const oldName = e.target.getAttribute('data-name');
         const oldCount = e.target.getAttribute('data-count');
-
         const newName = prompt("Edit Site Name:", oldName);
         if (newName === null) return; 
-        
         const newCountStr = prompt("Edit Pack Count:", oldCount);
         if (newCountStr === null) return; 
-        
         const newCount = parseInt(newCountStr);
-        if (!newName.trim() || isNaN(newCount) || newCount <= 0) {
-            return alert("Invalid name or count provided.");
-        }
-
+        if (!newName.trim() || isNaN(newCount) || newCount <= 0) return alert("Invalid data.");
+        
         try {
             e.target.innerText = "...";
-            await updateDoc(doc(db, "sites", docId), {
-                name: newName.trim(),
-                packCount: newCount
-            });
+            await updateDoc(doc(db, "sites", docId), { name: newName.trim(), packCount: newCount });
             await loadSites();
             renderAdminList();
-        } catch (error) {
-            console.error(error);
-            alert("Error updating site.");
-        }
+        } catch (error) { alert("Error updating site."); }
     }
 
     async function handleDeleteSite(e) {
         const docId = e.target.getAttribute('data-id');
         const siteName = e.target.getAttribute('data-name');
-
         if(confirm(`Are you sure you want to permanently delete "${siteName}"?`)) {
             try {
                 e.target.innerText = "...";
                 await deleteDoc(doc(db, "sites", docId));
                 await loadSites();
                 renderAdminList();
-            } catch (error) {
-                console.error(error);
-                alert("Error deleting site.");
-            }
+            } catch (error) { alert("Error deleting site."); }
         }
     }
 
     document.getElementById('saveSiteBtn').addEventListener('click', async () => {
         const name = document.getElementById('newSiteName').value.trim();
         const count = parseInt(document.getElementById('newSiteCount').value);
-        if (!name || isNaN(count) || count <= 0) return alert("Please enter a valid name and pack count.");
-        
+        if (!name || isNaN(count) || count <= 0) return alert("Valid name/count required.");
         const btn = document.getElementById('saveSiteBtn');
         btn.innerText = "Saving...";
         try {
@@ -448,13 +435,10 @@
             btn.innerText = "Save New Site";
             await loadSites(); 
             renderAdminList(); 
-        } catch (error) {
-            console.error("Error saving site:", error);
-            alert("Failed to save site.");
-        }
+        } catch (error) { alert("Failed to save site."); }
     });
 
-    // --- 3. START / LOAD SERVICE FLOW (WITH DATES) ---
+    // --- 3. START / LOAD SERVICE FLOW ---
     document.getElementById('siteSelect').addEventListener('change', (e) => {
         currentSiteName = e.target.value;
         if (currentSiteName) {
@@ -468,16 +452,17 @@
         }
     });
 
-    document.getElementById('startNewServiceBtn').addEventListener('click', () => {
+    document.getElementById('startNewServiceBtn').addEventListener('click', async () => {
         currentpackIndex = 1;
         packDataCache = {}; 
+        await loadSidebarNotes(); // Fetch existing notes for sidebar
         navigateTo('serviceSection', 'navHome');
         renderpackUI();
     });
 
     document.getElementById('fetchDatesBtn').addEventListener('click', async () => {
         const msg = document.getElementById('loadStatusMsg');
-        msg.innerText = "Finding historical service dates...";
+        msg.innerText = "Finding historical dates...";
         msg.style.color = "var(--primary)";
         document.getElementById('initialLoadGroup').style.display = 'none';
 
@@ -491,14 +476,12 @@
             querySnapshot.forEach(doc => {
                 const data = doc.data();
                 fetchedServiceDocs.push({ id: doc.id, ...data });
-                
-                // Extract YYYY-MM-DD from the document ID
                 const match = doc.id.match(/\d{4}-\d{2}-\d{2}/);
                 if (match) uniqueDates.add(match[0]);
             });
 
             if (uniqueDates.size === 0) {
-                msg.innerText = "No previous services found for this site.";
+                msg.innerText = "No previous services found.";
                 msg.style.color = "var(--danger)";
                 document.getElementById('initialLoadGroup').style.display = 'flex';
                 return;
@@ -506,19 +489,12 @@
 
             const select = document.getElementById('serviceDateSelect');
             select.innerHTML = '<option value="">-- Choose Date --</option>';
-            
-            // Sort dates from newest to oldest
-            Array.from(uniqueDates).sort().reverse().forEach(date => {
-                select.innerHTML += `<option value="${date}">${date}</option>`;
-            });
-
+            Array.from(uniqueDates).sort().reverse().forEach(date => select.innerHTML += `<option value="${date}">${date}</option>`);
             msg.innerText = "";
             document.getElementById('dateSelectionUI').style.display = 'block';
 
         } catch (error) {
-            console.error(error);
             msg.innerText = "Error loading dates.";
-            msg.style.color = "var(--danger)";
             document.getElementById('initialLoadGroup').style.display = 'flex';
         }
     });
@@ -529,13 +505,11 @@
         document.getElementById('loadStatusMsg').innerText = "";
     });
 
-    document.getElementById('confirmLoadBtn').addEventListener('click', () => {
+    document.getElementById('confirmLoadBtn').addEventListener('click', async () => {
         const selectedDate = document.getElementById('serviceDateSelect').value;
-        if (!selectedDate) return alert("Please select a date from the list.");
+        if (!selectedDate) return alert("Select a date.");
 
         const serviceMap = {};
-        
-        // Filter the fetched documents to only include the chosen date
         fetchedServiceDocs.forEach(record => {
             if (record.id.includes(selectedDate)) {
                 if (!serviceMap[record.packId] || (record.lastUpdated > serviceMap[record.packId].lastUpdated)) {
@@ -547,70 +521,51 @@
         packDataCache = {};
         for (let i = 1; i <= totalpacks; i++) {
             const record = serviceMap[`pack ${i}`];
-            if (record && record.serviceDetails) {
-                packDataCache[i] = record.serviceDetails;
-            }
+            if (record && record.serviceDetails) packDataCache[i] = record.serviceDetails;
         }
 
         currentpackIndex = 1;
         document.getElementById('loadStatusMsg').innerText = "";
+        
+        await loadSidebarNotes(); // Fetch existing notes for sidebar
+        
         navigateTo('serviceSection', 'navHome');
         renderpackUI();
     });
 
-
-    // --- 4. GENERAL SITE NOTES LOGIC ---
-    document.getElementById('noteSiteSelect').addEventListener('change', async (e) => {
-        const site = e.target.value;
-        const area = document.getElementById('notesEditArea');
-        const textArea = document.getElementById('generalSiteNotes');
-        const msg = document.getElementById('notesStatusMsg');
-        
-        msg.innerText = "";
-        if (!site) {
-            area.style.display = 'none';
-            return;
-        }
-
-        area.style.display = 'block';
+    // --- 4. SIDEBAR SITE NOTES LOGIC ---
+    async function loadSidebarNotes() {
+        const textArea = document.getElementById('sidebarSiteNotes');
         textArea.value = "Loading notes...";
         textArea.disabled = true;
 
         try {
-            const docRef = doc(db, "site_notes", site.replace(/\s+/g, '-'));
+            const docRef = doc(db, "site_notes", currentSiteName.replace(/\s+/g, '-'));
             const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-                textArea.value = docSnap.data().notes || "";
-            } else {
-                textArea.value = "";
-            }
+            if (docSnap.exists()) textArea.value = docSnap.data().notes || "";
+            else textArea.value = "";
         } catch (error) {
-            console.error(error);
             textArea.value = "";
-            msg.innerText = "Error loading notes.";
-            msg.style.color = "red";
         }
         textArea.disabled = false;
-    });
+    }
 
-    document.getElementById('saveSiteNotesBtn').addEventListener('click', async () => {
-        const site = document.getElementById('noteSiteSelect').value;
-        const notes = document.getElementById('generalSiteNotes').value;
-        const msg = document.getElementById('notesStatusMsg');
-        const btn = document.getElementById('saveSiteNotesBtn');
+    document.getElementById('saveSidebarNotesBtn').addEventListener('click', async () => {
+        const notes = document.getElementById('sidebarSiteNotes').value;
+        const msg = document.getElementById('sidebarNotesMsg');
+        const btn = document.getElementById('saveSidebarNotesBtn');
 
         btn.innerText = "Saving...";
         try {
-            const docRef = doc(db, "site_notes", site.replace(/\s+/g, '-'));
+            const docRef = doc(db, "site_notes", currentSiteName.replace(/\s+/g, '-'));
             await setDoc(docRef, { notes: notes, lastUpdated: serverTimestamp() }, { merge: true });
-            msg.innerText = "Site notes saved successfully! ✓";
+            msg.innerText = "Saved ✓";
             msg.style.color = "var(--success)";
         } catch (error) {
-            console.error(error);
-            msg.innerText = "Error saving notes.";
+            msg.innerText = "Error";
             msg.style.color = "var(--danger)";
         }
-        btn.innerText = "Save Site Notes";
+        btn.innerText = "Save Notes";
         setTimeout(() => msg.innerText = "", 3000);
     });
 
@@ -619,16 +574,12 @@
         const site = document.getElementById('printSiteSelect').value;
         const msg = document.getElementById('printStatusMsg');
         const printArea = document.getElementById('printOnlyArea');
-        
-        if (!site) return alert("Please select a site to print.");
-
+        if (!site) return alert("Select a site.");
         msg.innerText = "Fetching Data...";
-        msg.style.color = "black";
-
+        
         try {
             const q = query(collection(db, "services"), where("site", "==", site));
             const querySnapshot = await getDocs(q);
-            
             const serviceMap = {};
             querySnapshot.forEach(doc => {
                 const data = doc.data();
@@ -639,68 +590,36 @@
 
             let generalNotes = "None recorded.";
             const notesSnap = await getDoc(doc(db, "site_notes", site.replace(/\s+/g, '-')));
-            if (notesSnap.exists() && notesSnap.data().notes) {
-                generalNotes = notesSnap.data().notes;
-            }
+            if (notesSnap.exists() && notesSnap.data().notes) generalNotes = notesSnap.data().notes;
 
-            const today = new Date().toLocaleDateString();
-            let html = `
-                <div class="print-header">
-                    <h1>Service Issue Summary: ${site}</h1>
-                    <p><strong>Date Printed:</strong> ${today}</p>
-                    <p><strong>General Notes:</strong><br> ${generalNotes.replace(/\n/g, '<br>')}</p>
-                </div>
-                <h2>Pack Issues Addressed (Most Recent Record):</h2>
-            `;
+            let html = `<div class="print-header"><h1>Issue Summary: ${site}</h1><p><strong>Date Printed:</strong> ${new Date().toLocaleDateString()}</p><p><strong>General Notes:</strong><br> ${generalNotes.replace(/\n/g, '<br>')}</p></div><h2>Pack Issues:</h2>`;
 
             let hasIssues = false;
-            const total = sitesData[site].count;
-
-            for (let i = 1; i <= total; i++) {
+            for (let i = 1; i <= sitesData[site].count; i++) {
                 const record = serviceMap[`pack ${i}`];
                 if (record) {
                     const parts = record.serviceDetails;
                     const issues = Object.keys(parts).filter(p => parts[p].status === 'Issue');
-                    
                     if (issues.length > 0) {
                         hasIssues = true;
-                        html += `<div class="print-pack-block">`;
-                        html += `<div class="print-pack-title">Pack ${i}</div>`;
-                        html += `<ul class="print-issue-list">`;
-                        issues.forEach(part => {
-                            const noteText = parts[part].notes ? ` - <em>${parts[part].notes}</em>` : "";
-                            html += `<li><strong>${part}:</strong> Issue logged${noteText}</li>`;
-                        });
+                        html += `<div class="print-pack-block"><div class="print-pack-title">Pack ${i}</div><ul class="print-issue-list">`;
+                        issues.forEach(part => html += `<li><strong>${part}:</strong> Issue logged${parts[part].notes ? ` - <em>${parts[part].notes}</em>` : ""}</li>`);
                         html += `</ul></div>`;
                     }
                 }
             }
 
-            if (!hasIssues) {
-                html += `<p style="color: green; font-weight: bold;">No pack issues recorded for this site. All Good!</p>`;
-            }
-
+            if (!hasIssues) html += `<p style="color: green; font-weight: bold;">No issues recorded. All Good!</p>`;
+            
             printArea.innerHTML = html;
             msg.innerText = "";
             window.print();
-
-        } catch (error) {
-            console.error(error);
-            msg.innerText = "Error generating print report.";
-            msg.style.color = "red";
-        }
+        } catch (error) { msg.innerText = "Error generating print report."; }
     });
 
-    // --- 6. GRID REPORT LOGIC ---
-    document.getElementById('loadReportBtn').addEventListener('click', async () => {
-        const site = document.getElementById('reportSiteSelect').value;
-        if (!site) return alert("Please select a site first.");
-
-        const btn = document.getElementById('loadReportBtn');
-        const container = document.getElementById('tableContainer');
-        btn.innerText = "Fetching Data...";
-        container.innerHTML = "";
-
+    // --- 6. GRID REPORT LOGIC (Reusable Builder) ---
+    async function buildGridTable(site, containerElement) {
+        containerElement.innerHTML = '<p style="text-align: center;">Fetching Live Data...</p>';
         try {
             const q = query(collection(db, "services"), where("site", "==", site));
             const querySnapshot = await getDocs(q);
@@ -717,15 +636,21 @@
             let tableHTML = `<table><thead><tr><th>Pack #</th><th>Right Shoulder</th><th>Left Shoulder</th><th>Front</th><th>Back</th><th>Gun</th><th>Issues & Notes</th></tr></thead><tbody>`;
 
             for (let i = 1; i <= total; i++) {
-                const record = serviceMap[`pack ${i}`];
-                if (record) {
-                    const parts = record.serviceDetails;
+                // If checking the current active session site, merge unsaved cache so overlay is instantly accurate
+                let recordData = null;
+                if (site === currentSiteName && packDataCache[i] && Object.keys(packDataCache[i]).some(p => packDataCache[i][p].status !== null)) {
+                    recordData = packDataCache[i];
+                } else if (serviceMap[`pack ${i}`]) {
+                    recordData = serviceMap[`pack ${i}`].serviceDetails;
+                }
+
+                if (recordData) {
                     let allNotes = [];
                     const getIcon = (partName) => {
-                        const status = parts[partName]?.status;
+                        const status = recordData[partName]?.status;
                         if (status === 'Good') return '<span class="tick">✔</span>';
                         if (status === 'Issue') {
-                            if (parts[partName].notes) allNotes.push(`<strong>${partName}:</strong> ${parts[partName].notes}`);
+                            if (recordData[partName].notes) allNotes.push(`<strong>${partName}:</strong> ${recordData[partName].notes}`);
                             return '<span class="cross">✘</span>';
                         }
                         return '<span class="pending">-</span>';
@@ -737,12 +662,32 @@
                 }
             }
             tableHTML += `</tbody></table>`;
-            container.innerHTML = tableHTML;
+            containerElement.innerHTML = tableHTML;
         } catch (error) {
-            container.innerHTML = '<p style="color: red;">Error loading report.</p>';
+            containerElement.innerHTML = '<p style="color: red;">Error loading report.</p>';
         }
+    }
+
+    // Trigger for Global Grid Menu
+    document.getElementById('loadReportBtn').addEventListener('click', async () => {
+        const site = document.getElementById('reportSiteSelect').value;
+        if (!site) return alert("Select a site first.");
+        const btn = document.getElementById('loadReportBtn');
+        btn.innerText = "Fetching Data...";
+        await buildGridTable(site, document.getElementById('tableContainer'));
         btn.innerText = "Generate Table";
     });
+
+    // Trigger for Sidebar Modal Grid
+    document.getElementById('viewOverlayGridBtn').addEventListener('click', async () => {
+        gridModal.style.display = "block";
+        await buildGridTable(currentSiteName, document.getElementById('modalTableContainer'));
+    });
+
+    // Modal Close Logic
+    document.getElementById('closeModalBtn').addEventListener('click', () => gridModal.style.display = "none");
+    window.onclick = function(event) { if (event.target == gridModal) gridModal.style.display = "none"; }
+
 
     // --- 7. CHECKLIST SERVICE SESSION & AUTO-SAVE ---
     async function triggerBackgroundSave() {
