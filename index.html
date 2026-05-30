@@ -90,13 +90,40 @@
         .btn-edit { background-color: #ffc107; color: #333; font-weight: bold;}
         .btn-del { background-color: var(--danger); font-weight: bold;}
 
-        /* Navigation Controls */
+        /* --- FIXED NAVIGATION CONTROLS --- */
         .nav-controls {
-            display: flex; justify-content: space-between; align-items: center; background: #eef2f5; padding: 15px; border-radius: 8px; margin-bottom: 20px;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: #eef2f5; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            gap: 15px; /* Adds breathing room between buttons and text */
         }
-        .nav-controls button { width: auto; margin: 0; padding: 15px 30px; }
-        .nav-status { text-align: center; font-size: 1.4rem; font-weight: bold; }
-        .save-indicator { font-size: 0.9rem; color: var(--secondary); display: block; margin-top: 5px; font-weight: normal;}
+        .nav-controls button { 
+            flex: 1; /* Allows buttons to size dynamically */
+            max-width: 150px; /* Prevents them from getting too wide */
+            margin: 0; 
+            padding: 15px 10px; 
+            font-size: 1.1rem;
+        }
+        .nav-status { 
+            flex: 2; /* Forces text to take up the bulk of the middle space */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center; 
+            font-size: 1.4rem; 
+            font-weight: bold; 
+        }
+        .save-indicator { 
+            font-size: 0.9rem; 
+            color: var(--secondary); 
+            display: block; 
+            margin-top: 5px; 
+            font-weight: normal;
+        }
         
         /* Pack Parts Checklist */
         .part-section { border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: #fafafa; }
@@ -156,10 +183,23 @@
         
         <div id="serviceTypeSelection" style="display: none; background: #f0f4f8; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #d0deeb;">
             <p style="text-align: center; font-size: 1.2rem; font-weight: bold; margin-top: 0;">Site Selected. Choose an action:</p>
-            <div class="action-group">
+            
+            <div class="action-group" id="initialLoadGroup">
                 <button class="btn-primary" id="startNewServiceBtn">Start New Service</button>
-                <button class="btn-secondary" id="loadPrevServiceBtn">Load Previous Service</button>
+                <button class="btn-secondary" id="fetchDatesBtn">Load Previous Service</button>
             </div>
+            
+            <div id="dateSelectionUI" style="display: none; margin-top: 15px;">
+                <label>Select Historical Service Date:</label>
+                <select id="serviceDateSelect">
+                    <option value="">-- Choose Date --</option>
+                </select>
+                <div class="action-group">
+                    <button class="btn-primary" id="confirmLoadBtn">Load Selected Date</button>
+                    <button class="btn-outline" id="cancelLoadBtn">Cancel</button>
+                </div>
+            </div>
+
             <div id="loadStatusMsg" style="text-align: center; font-weight: bold; margin-top: 10px;"></div>
         </div>
 
@@ -251,6 +291,7 @@
     let totalpacks = 0;
     let currentpackIndex = 1;
     let packDataCache = {}; 
+    let fetchedServiceDocs = []; // Holds cloud data for date filtering
     let isDirty = false;    
     const partsList = ["Right Shoulder", "Left Shoulder", "Front", "Back", "Gun"];
 
@@ -273,6 +314,10 @@
         
         document.getElementById('siteSelect').value = "";
         serviceTypeSelection.style.display = 'none';
+        
+        // Reset sub-menus
+        document.getElementById('initialLoadGroup').style.display = 'flex';
+        document.getElementById('dateSelectionUI').style.display = 'none';
         
         if(sectionId === 'adminSection') renderAdminList();
     }
@@ -409,12 +454,14 @@
         }
     });
 
-    // --- 3. START / LOAD SERVICE FLOW ---
+    // --- 3. START / LOAD SERVICE FLOW (WITH DATES) ---
     document.getElementById('siteSelect').addEventListener('change', (e) => {
         currentSiteName = e.target.value;
         if (currentSiteName) {
             totalpacks = sitesData[currentSiteName].count;
             serviceTypeSelection.style.display = 'block';
+            document.getElementById('initialLoadGroup').style.display = 'flex';
+            document.getElementById('dateSelectionUI').style.display = 'none';
             document.getElementById('loadStatusMsg').innerText = '';
         } else {
             serviceTypeSelection.style.display = 'none';
@@ -428,42 +475,89 @@
         renderpackUI();
     });
 
-    document.getElementById('loadPrevServiceBtn').addEventListener('click', async () => {
+    document.getElementById('fetchDatesBtn').addEventListener('click', async () => {
         const msg = document.getElementById('loadStatusMsg');
-        msg.innerText = "Fetching previous records...";
+        msg.innerText = "Finding historical service dates...";
         msg.style.color = "var(--primary)";
+        document.getElementById('initialLoadGroup').style.display = 'none';
 
         try {
             const q = query(collection(db, "services"), where("site", "==", currentSiteName));
             const querySnapshot = await getDocs(q);
             
-            const serviceMap = {};
+            fetchedServiceDocs = [];
+            const uniqueDates = new Set();
+            
             querySnapshot.forEach(doc => {
                 const data = doc.data();
-                if (!serviceMap[data.packId] || (data.lastUpdated > serviceMap[data.packId].lastUpdated)) {
-                    serviceMap[data.packId] = data;
-                }
+                fetchedServiceDocs.push({ id: doc.id, ...data });
+                
+                // Extract YYYY-MM-DD from the document ID
+                const match = doc.id.match(/\d{4}-\d{2}-\d{2}/);
+                if (match) uniqueDates.add(match[0]);
             });
 
-            packDataCache = {};
-            for (let i = 1; i <= totalpacks; i++) {
-                const record = serviceMap[`pack ${i}`];
-                if (record && record.serviceDetails) {
-                    packDataCache[i] = record.serviceDetails;
-                }
+            if (uniqueDates.size === 0) {
+                msg.innerText = "No previous services found for this site.";
+                msg.style.color = "var(--danger)";
+                document.getElementById('initialLoadGroup').style.display = 'flex';
+                return;
             }
 
-            currentpackIndex = 1;
+            const select = document.getElementById('serviceDateSelect');
+            select.innerHTML = '<option value="">-- Choose Date --</option>';
+            
+            // Sort dates from newest to oldest
+            Array.from(uniqueDates).sort().reverse().forEach(date => {
+                select.innerHTML += `<option value="${date}">${date}</option>`;
+            });
+
             msg.innerText = "";
-            navigateTo('serviceSection', 'navHome');
-            renderpackUI();
+            document.getElementById('dateSelectionUI').style.display = 'block';
 
         } catch (error) {
             console.error(error);
-            msg.innerText = "Error loading previous records.";
+            msg.innerText = "Error loading dates.";
             msg.style.color = "var(--danger)";
+            document.getElementById('initialLoadGroup').style.display = 'flex';
         }
     });
+
+    document.getElementById('cancelLoadBtn').addEventListener('click', () => {
+        document.getElementById('dateSelectionUI').style.display = 'none';
+        document.getElementById('initialLoadGroup').style.display = 'flex';
+        document.getElementById('loadStatusMsg').innerText = "";
+    });
+
+    document.getElementById('confirmLoadBtn').addEventListener('click', () => {
+        const selectedDate = document.getElementById('serviceDateSelect').value;
+        if (!selectedDate) return alert("Please select a date from the list.");
+
+        const serviceMap = {};
+        
+        // Filter the fetched documents to only include the chosen date
+        fetchedServiceDocs.forEach(record => {
+            if (record.id.includes(selectedDate)) {
+                if (!serviceMap[record.packId] || (record.lastUpdated > serviceMap[record.packId].lastUpdated)) {
+                    serviceMap[record.packId] = record;
+                }
+            }
+        });
+
+        packDataCache = {};
+        for (let i = 1; i <= totalpacks; i++) {
+            const record = serviceMap[`pack ${i}`];
+            if (record && record.serviceDetails) {
+                packDataCache[i] = record.serviceDetails;
+            }
+        }
+
+        currentpackIndex = 1;
+        document.getElementById('loadStatusMsg').innerText = "";
+        navigateTo('serviceSection', 'navHome');
+        renderpackUI();
+    });
+
 
     // --- 4. GENERAL SITE NOTES LOGIC ---
     document.getElementById('noteSiteSelect').addEventListener('change', async (e) => {
@@ -556,7 +650,7 @@
                     <p><strong>Date Printed:</strong> ${today}</p>
                     <p><strong>General Notes:</strong><br> ${generalNotes.replace(/\n/g, '<br>')}</p>
                 </div>
-                <h2>Pack Issues Addressed:</h2>
+                <h2>Pack Issues Addressed (Most Recent Record):</h2>
             `;
 
             let hasIssues = false;
@@ -694,11 +788,9 @@
         }
     });
 
-    // NEW: "Mark Remaining as Good" Logic
     document.getElementById('packAllOkBtn').addEventListener('click', () => {
         let changed = false;
         partsList.forEach(part => {
-            // Only update if it isn't already flagged as an "Issue"
             if (packDataCache[currentpackIndex][part].status !== 'Issue') {
                 packDataCache[currentpackIndex][part].status = 'Good';
                 changed = true;
@@ -709,7 +801,7 @@
             isDirty = true;
             document.getElementById('saveIndicator').innerText = "Unsaved Changes...";
             document.getElementById('saveIndicator').style.color = "var(--secondary)";
-            renderpackUI(); // Re-render to show updated active states
+            renderpackUI(); 
         }
     });
 
