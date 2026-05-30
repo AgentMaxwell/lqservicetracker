@@ -71,6 +71,8 @@
         .btn-secondary { background-color: var(--secondary); color: white; border: none; font-weight: bold; cursor: pointer;}
         .btn-secondary:active { background-color: #5a6268; }
         .btn-danger { background-color: var(--danger); color: white; border: none; font-weight: bold; cursor: pointer;}
+        .btn-success { background-color: var(--success); color: white; border: none; font-weight: bold; cursor: pointer;}
+        .btn-success:active { opacity: 0.8; }
         
         /* Sections */
         .app-section { display: none; }
@@ -230,6 +232,9 @@
             </div>
             <button class="btn-primary" id="nextBtn">Next &raquo;</button>
         </div>
+
+        <button class="btn-success" id="packAllOkBtn">✔ Mark Remaining Parts as "All Good"</button>
+
         <div id="partsContainer"></div>
     </div>
 </div>
@@ -238,11 +243,10 @@
 
 <script type="module">
     import { db } from './firebase-config.js';
-    // Added updateDoc and deleteDoc for full management
     import { collection, addDoc, setDoc, getDoc, getDocs, doc, updateDoc, deleteDoc, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     // App State
-    let sitesData = {}; // Format: { "Site Name": { id: "doc_id", count: 10 } }
+    let sitesData = {}; 
     let currentSiteName = "";
     let totalpacks = 0;
     let currentpackIndex = 1;
@@ -267,7 +271,6 @@
         document.getElementById(sectionId).classList.add('active');
         if (clickedBtnId) document.getElementById(clickedBtnId).classList.add('active');
         
-        // Reset Setup UI
         document.getElementById('siteSelect').value = "";
         serviceTypeSelection.style.display = 'none';
         
@@ -290,9 +293,8 @@
             sitesData = {};
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
-                const count = data.packCount || data.gearCount || 0; // backwards compatibility
+                const count = data.packCount || data.gearCount || 0; 
                 
-                // Store the document ID so we can edit/delete it later
                 sitesData[data.name] = { id: doc.id, count: count };
                 
                 selects.forEach(id => {
@@ -332,7 +334,6 @@
             listDiv.appendChild(itemDiv);
         });
 
-        // Attach listeners to new Edit/Delete buttons
         document.querySelectorAll('.btn-edit').forEach(btn => {
             btn.addEventListener('click', handleEditSite);
         });
@@ -347,10 +348,10 @@
         const oldCount = e.target.getAttribute('data-count');
 
         const newName = prompt("Edit Site Name:", oldName);
-        if (newName === null) return; // Cancelled
+        if (newName === null) return; 
         
         const newCountStr = prompt("Edit Pack Count:", oldCount);
-        if (newCountStr === null) return; // Cancelled
+        if (newCountStr === null) return; 
         
         const newCount = parseInt(newCountStr);
         if (!newName.trim() || isNaN(newCount) || newCount <= 0) {
@@ -375,7 +376,7 @@
         const docId = e.target.getAttribute('data-id');
         const siteName = e.target.getAttribute('data-name');
 
-        if(confirm(`Are you sure you want to permanently delete "${siteName}"? This will hide it from the dropdown menus.`)) {
+        if(confirm(`Are you sure you want to permanently delete "${siteName}"?`)) {
             try {
                 e.target.innerText = "...";
                 await deleteDoc(doc(db, "sites", docId));
@@ -401,7 +402,7 @@
             document.getElementById('newSiteCount').value = "";
             btn.innerText = "Save New Site";
             await loadSites(); 
-            renderAdminList(); // Refresh the list UI
+            renderAdminList(); 
         } catch (error) {
             console.error("Error saving site:", error);
             alert("Failed to save site.");
@@ -574,7 +575,7 @@
                         html += `<ul class="print-issue-list">`;
                         issues.forEach(part => {
                             const noteText = parts[part].notes ? ` - <em>${parts[part].notes}</em>` : "";
-                            html += `<li><strong>${part}:</strong> ${noteText}</li>`;
+                            html += `<li><strong>${part}:</strong> Issue logged${noteText}</li>`;
                         });
                         html += `</ul></div>`;
                     }
@@ -690,6 +691,25 @@
             currentpackIndex++; renderpackUI();
         } else {
             alert("You have reached the end of the packs for this site.");
+        }
+    });
+
+    // NEW: "Mark Remaining as Good" Logic
+    document.getElementById('packAllOkBtn').addEventListener('click', () => {
+        let changed = false;
+        partsList.forEach(part => {
+            // Only update if it isn't already flagged as an "Issue"
+            if (packDataCache[currentpackIndex][part].status !== 'Issue') {
+                packDataCache[currentpackIndex][part].status = 'Good';
+                changed = true;
+            }
+        });
+
+        if (changed) {
+            isDirty = true;
+            document.getElementById('saveIndicator').innerText = "Unsaved Changes...";
+            document.getElementById('saveIndicator').style.color = "var(--secondary)";
+            renderpackUI(); // Re-render to show updated active states
         }
     });
 
