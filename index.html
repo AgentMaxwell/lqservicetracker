@@ -428,7 +428,7 @@
         activeServiceDate = new Date().toISOString().split('T')[0]; 
         
         await loadSidebarNotes(); 
-        navigateTo('serviceSection'); // Goes directly to active service
+        navigateTo('serviceSection'); 
         renderpackUI();
     });
 
@@ -490,7 +490,7 @@
 
         currentpackIndex = 1;
         await loadSidebarNotes(); 
-        navigateTo('serviceSection'); // Goes directly to active service
+        navigateTo('serviceSection'); 
         renderpackUI();
     });
 
@@ -615,16 +615,22 @@
             </div>
         `;
 
-        let hasGeneralIssues = false;
-        let generalHtml = `<div class="print-section-title">General Checks Faults</div><ul class="print-issue-list">`;
+        // Explicitly printing ALL General Checks (including "Good")
+        let hasGeneralItems = false;
+        let generalHtml = `<div class="print-section-title">General Site Checks</div><ul class="print-issue-list">`;
         generalChecksList.forEach(item => {
-            if (generalChecksCache[item] && generalChecksCache[item].status === 'Issue') {
-                hasGeneralIssues = true;
-                generalHtml += `<li><strong>${item}:</strong> ${generalChecksCache[item].notes || "Issue logged"}</li>`;
+            if (generalChecksCache[item]) {
+                if (generalChecksCache[item].status === 'Issue') {
+                    hasGeneralItems = true;
+                    generalHtml += `<li><strong>${item}:</strong> ${generalChecksCache[item].notes || "Issue logged"}</li>`;
+                } else if (generalChecksCache[item].status === 'Good') {
+                    hasGeneralItems = true;
+                    generalHtml += `<li><strong>${item}:</strong> Checked all good</li>`;
+                }
             }
         });
         generalHtml += `</ul>`;
-        if (hasGeneralIssues) html += generalHtml;
+        if (hasGeneralItems) html += generalHtml;
 
         let gunIssuesHtml = `<div class="print-section-title">Gun Faults</div><ul class="print-issue-list">`;
         let packIssuesHtml = `<div class="print-section-title">Pack Faults</div><ul class="print-issue-list">`;
@@ -634,12 +640,14 @@
         for (let i = 1; i <= totalpacks; i++) {
             if (packDataCache[i]) {
                 const parts = packDataCache[i];
+                
                 gunPartsList.forEach(part => {
                     if (parts[part] && parts[part].status === 'Issue') {
                         hasGunIssues = true;
                         gunIssuesHtml += `<li><strong>Pack ${i} (${part}):</strong> ${parts[part].notes || "Issue logged"}</li>`;
                     }
                 });
+                
                 packPartsList.forEach(part => {
                     if (parts[part] && parts[part].status === 'Issue') {
                         hasPackIssues = true;
@@ -653,7 +661,7 @@
         if (hasGunIssues) html += gunIssuesHtml;
         if (hasPackIssues) html += packIssuesHtml;
 
-        if (!hasGeneralIssues && !hasGunIssues && !hasPackIssues) {
+        if (!hasGeneralItems && !hasGunIssues && !hasPackIssues) {
             html += `<p style="color: green; font-weight: bold; margin-top:20px;">No issues recorded for this site. All Good!</p>`;
         }
 
@@ -684,9 +692,11 @@
 
             for (let i = 1; i <= total; i++) {
                 let recordData = packDataCache[i] || (serviceMap[`pack ${i}`] ? serviceMap[`pack ${i}`].serviceDetails : null);
+                
                 if (recordData) {
                     let allNotes = [];
                     tableHTML += `<tr><td><strong>${i}</strong></td>`;
+                    
                     allPackElements.forEach(part => {
                         const status = recordData[part]?.status;
                         if (status === 'Good') tableHTML += `<td><span class="tick">✔</span></td>`;
@@ -695,6 +705,7 @@
                             tableHTML += `<td><span class="cross">✘</span></td>`;
                         } else tableHTML += `<td><span class="pending">-</span></td>`;
                     });
+                    
                     tableHTML += `<td class="notes-cell">${allNotes.join('<br>') || '<span style="color:#28a745;">None</span>'}</td></tr>`;
                 } else {
                     tableHTML += `<tr><td><strong>${i}</strong></td><td colspan="${allPackElements.length + 1}" class="pending">Not Serviced Yet</td></tr>`;
@@ -704,6 +715,7 @@
             containerElement.innerHTML = tableHTML;
         } catch (error) { containerElement.innerHTML = '<p style="color: red;">Error.</p>'; }
     });
+
     document.getElementById('closeModalBtn').addEventListener('click', () => gridModal.style.display = "none");
 
     // --- 8. CHECKLIST SERVICE SESSION & AUTO-SAVE ---
@@ -716,6 +728,7 @@
 
         try {
             const docId = `${currentSiteName.replace(/\s+/g, '-')}-${activeServiceDate}-pack-${packToSave}`;
+            
             let nextDueDateStr = "";
             if (activeServiceDate) {
                 const dateParts = activeServiceDate.split('-');
@@ -729,6 +742,7 @@
                 site: currentSiteName, packId: `pack ${packToSave}`, representative: currentRepresentative || "Not Specified",
                 serviceDate: activeServiceDate, nextServiceDue: nextDueDateStr, serviceDetails: dataToSave, lastUpdated: serverTimestamp()
             });
+
             document.getElementById('saveIndicator').innerText = "Cloud Synced ✓";
             document.getElementById('saveIndicator').style.color = "#aaa";
         } catch (error) {
@@ -751,6 +765,12 @@
 
     document.getElementById('packAllOkBtn').addEventListener('click', async () => {
         let changed = false;
+        
+        if (!packDataCache[currentpackIndex]) packDataCache[currentpackIndex] = {};
+        allPackElements.forEach(part => {
+            if (!packDataCache[currentpackIndex][part]) packDataCache[currentpackIndex][part] = { status: null, notes: "" };
+        });
+
         allPackElements.forEach(part => {
             if (packDataCache[currentpackIndex][part].status !== 'Issue') {
                 packDataCache[currentpackIndex][part].status = 'Good';
@@ -795,10 +815,15 @@
 
         if (!packDataCache[currentpackIndex]) {
             packDataCache[currentpackIndex] = {};
-            allPackElements.forEach(part => { packDataCache[currentpackIndex][part] = { status: null, notes: "" }; });
         }
-        const currentData = packDataCache[currentpackIndex];
+        // Safe backfill for older database records
+        allPackElements.forEach(part => {
+            if (!packDataCache[currentpackIndex][part]) {
+                packDataCache[currentpackIndex][part] = { status: null, notes: "" };
+            }
+        });
 
+        const currentData = packDataCache[currentpackIndex];
         const packContainer = document.getElementById('packPartsContainer');
         const gunContainer = document.getElementById('gunPartsContainer');
         packContainer.innerHTML = '';
