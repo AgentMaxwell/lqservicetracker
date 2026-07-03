@@ -216,7 +216,7 @@
         <div class="nav-controls" style="justify-content: space-between;">
             <button class="btn-primary" id="backToPacksBtn">&laquo; Back to Active Service</button>
             <div class="nav-status"><div class="save-indicator" id="generalSaveIndicator">Cloud Synced ✓</div></div>
-            <div style="flex: 1; max-width: 150px;"></div> <!-- Spacer for flexbox alignment -->
+            <div style="flex: 1; max-width: 150px;"></div>
         </div>
     </div>
 
@@ -421,18 +421,19 @@
     });
 
     document.getElementById('startNewServiceBtn').addEventListener('click', async () => {
-        if(!currentRepresentative) return alert("Please open 'Manage Sites' or the Sidebar later to set your Representative Name.");
+        // Validation removed from start flow as per request
         currentpackIndex = 1;
         packDataCache = {}; 
         generalChecksCache = {};
         activeServiceDate = new Date().toISOString().split('T')[0]; 
         
         await loadSidebarNotes(); 
-        navigateTo('serviceSection'); 
-        renderpackUI();
+        navigateTo('generalChecksSection');
+        renderGeneralChecksUI();
     });
 
     document.getElementById('fetchDatesBtn').addEventListener('click', async () => {
+        // Validation removed from load flow as per request
         const msg = document.getElementById('loadStatusMsg');
         msg.innerText = "Finding historical dates..."; msg.style.color = "var(--primary)";
         document.getElementById('initialLoadGroup').style.display = 'none';
@@ -457,6 +458,7 @@
             Array.from(uniqueDates).sort().reverse().forEach(date => select.innerHTML += `<option value="${date}">${date}</option>`);
             msg.innerText = "";
             document.getElementById('dateSelectionUI').style.display = 'block';
+
         } catch (error) { msg.innerText = "Error loading dates."; document.getElementById('initialLoadGroup').style.display = 'flex'; }
     });
 
@@ -490,8 +492,8 @@
 
         currentpackIndex = 1;
         await loadSidebarNotes(); 
-        navigateTo('serviceSection'); 
-        renderpackUI();
+        navigateTo('generalChecksSection');
+        renderGeneralChecksUI();
     });
 
     // --- 4. GENERAL CHECKS SECTION (Accessed from Sidebar) ---
@@ -615,22 +617,21 @@
             </div>
         `;
 
-        // Explicitly printing ALL General Checks (including "Good")
-        let hasGeneralItems = false;
+        let hasGeneralIssues = false;
         let generalHtml = `<div class="print-section-title">General Site Checks</div><ul class="print-issue-list">`;
         generalChecksList.forEach(item => {
             if (generalChecksCache[item]) {
                 if (generalChecksCache[item].status === 'Issue') {
-                    hasGeneralItems = true;
+                    hasGeneralIssues = true;
                     generalHtml += `<li><strong>${item}:</strong> ${generalChecksCache[item].notes || "Issue logged"}</li>`;
                 } else if (generalChecksCache[item].status === 'Good') {
-                    hasGeneralItems = true;
+                    hasGeneralIssues = true;
                     generalHtml += `<li><strong>${item}:</strong> Checked all good</li>`;
                 }
             }
         });
         generalHtml += `</ul>`;
-        if (hasGeneralItems) html += generalHtml;
+        if (hasGeneralIssues) html += generalHtml;
 
         let gunIssuesHtml = `<div class="print-section-title">Gun Faults</div><ul class="print-issue-list">`;
         let packIssuesHtml = `<div class="print-section-title">Pack Faults</div><ul class="print-issue-list">`;
@@ -661,7 +662,7 @@
         if (hasGunIssues) html += gunIssuesHtml;
         if (hasPackIssues) html += packIssuesHtml;
 
-        if (!hasGeneralItems && !hasGunIssues && !hasPackIssues) {
+        if (!hasGeneralIssues && !hasGunIssues && !hasPackIssues) {
             html += `<p style="color: green; font-weight: bold; margin-top:20px;">No issues recorded for this site. All Good!</p>`;
         }
 
@@ -715,7 +716,6 @@
             containerElement.innerHTML = tableHTML;
         } catch (error) { containerElement.innerHTML = '<p style="color: red;">Error.</p>'; }
     });
-
     document.getElementById('closeModalBtn').addEventListener('click', () => gridModal.style.display = "none");
 
     // --- 8. CHECKLIST SERVICE SESSION & AUTO-SAVE ---
@@ -728,7 +728,6 @@
 
         try {
             const docId = `${currentSiteName.replace(/\s+/g, '-')}-${activeServiceDate}-pack-${packToSave}`;
-            
             let nextDueDateStr = "";
             if (activeServiceDate) {
                 const dateParts = activeServiceDate.split('-');
@@ -742,7 +741,6 @@
                 site: currentSiteName, packId: `pack ${packToSave}`, representative: currentRepresentative || "Not Specified",
                 serviceDate: activeServiceDate, nextServiceDue: nextDueDateStr, serviceDetails: dataToSave, lastUpdated: serverTimestamp()
             });
-
             document.getElementById('saveIndicator').innerText = "Cloud Synced ✓";
             document.getElementById('saveIndicator').style.color = "#aaa";
         } catch (error) {
@@ -816,7 +814,6 @@
         if (!packDataCache[currentpackIndex]) {
             packDataCache[currentpackIndex] = {};
         }
-        // Safe backfill for older database records
         allPackElements.forEach(part => {
             if (!packDataCache[currentpackIndex][part]) {
                 packDataCache[currentpackIndex][part] = { status: null, notes: "" };
