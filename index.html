@@ -37,14 +37,15 @@
             border: 1px solid var(--border-color);
         }
         
+        /* Header styling updated for flexible buttons */
         .app-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid var(--border-color); }
         .app-header h1 { margin: 0; text-align: center; flex: 1; color: var(--primary); font-size: 1.8rem; letter-spacing: 1px;}
         .header-btn { background-color: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; padding: 10px 18px; font-size: 1rem; border-radius: 8px; width: auto; margin: 0; }
         .header-btn:active { background-color: var(--primary-hover); }
         .header-btn.secondary { background-color: var(--secondary); }
         .header-btn.secondary:active { background-color: #444; }
-        .header-edge { flex: 0 0 120px; display: flex; }
-        .header-edge.right { justify-content: flex-end; }
+        .header-edge { flex: 1; display: flex; }
+        .header-edge.right { justify-content: flex-end; gap: 10px; align-items: center;}
 
         h2, h3 { text-align: center; color: var(--primary); margin-top: 0; margin-bottom: 15px;}
         
@@ -77,10 +78,8 @@
         .btn-edit { background-color: #f57c00; color: white; font-weight: bold;}
         .btn-del { background-color: var(--danger); font-weight: bold;}
 
-        /* Layouts */
-        .service-layout { display: flex; gap: 15px; align-items: flex-start; }
-        .service-main { flex: 2.5; min-width: 0; display: flex; flex-direction: column;} 
-        .service-sidebar { flex: 1; background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); min-width: 0; position: sticky; top: 15px; }
+        /* Service Area (Full Width) */
+        .service-main { width: 100%; display: flex; flex-direction: column;} 
         
         .progress-container { width: 100%; background: #333; border-radius: 6px; height: 10px; margin-bottom: 10px; overflow: hidden;}
         .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s ease-out; }
@@ -110,8 +109,25 @@
         .notes-area.visible { display: block; }
         .notes-area textarea { width: 100%; height: 75px; padding: 8px; font-size: 1rem; border-radius: 6px; border: 1px solid var(--border-color); background: #1e1e1e; color: var(--text-main); resize: vertical; box-sizing: border-box; }
 
-        .sidebar-title { font-size: 1.2rem; font-weight: bold; color: var(--primary); margin-bottom: 15px; text-align: center; border-bottom: 2px solid var(--primary); padding-bottom: 5px; }
-        .service-sidebar button { padding: 12px; font-size: 1.05rem; margin-bottom: 10px; }
+        /* --- SLIDE OUT BURGER MENU CSS --- */
+        .slide-out-menu {
+            position: fixed; top: 0; right: -320px; width: 320px; height: 100%;
+            background-color: var(--card-bg); box-shadow: -5px 0 25px rgba(0,0,0,0.9);
+            z-index: 2000; transition: right 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            padding: 20px; overflow-y: auto; border-left: 1px solid var(--border-color); box-sizing: border-box;
+        }
+        .slide-out-menu.open { right: 0; }
+        .menu-backdrop {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 1999;
+            opacity: 0; visibility: hidden; transition: opacity 0.3s ease;
+        }
+        .menu-backdrop.show { visibility: visible; opacity: 1; }
+        .close-menu-btn { background: none; border: none; color: #888; font-size: 28px; font-weight: bold; cursor: pointer; float: right; padding: 0; margin-bottom: 10px; line-height: 1; width: auto; }
+        .close-menu-btn:hover { color: #fff; background: none;}
+        
+        .sidebar-title { font-size: 1.2rem; font-weight: bold; color: var(--primary); margin-bottom: 15px; text-align: center; border-bottom: 2px solid var(--primary); padding-bottom: 5px; clear: both;}
+        .slide-out-menu button { padding: 12px; font-size: 1.05rem; margin-bottom: 10px; }
         
         .accordion-toggle { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--input-bg); border-radius: 8px; border: 1px solid var(--border-color); margin-top: 15px; font-weight: bold; cursor: pointer; color: var(--text-main);}
         .accordion-content { display: none; padding-top: 10px; }
@@ -129,15 +145,16 @@
         .pending { color: #888; font-style: italic; }
         .notes-cell { text-align: left; color: #ff8a80; max-width: 250px; font-size: 0.85rem;}
 
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(4px); }
+        .modal { display: none; position: fixed; z-index: 2500; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(4px); }
         .modal-content { background-color: var(--card-bg); margin: 3% auto; padding: 25px; border-radius: 12px; width: 95%; max-width: 1400px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.5); position: relative; border: 1px solid var(--border-color); }
-        .close-btn { position: absolute; top: 15px; right: 20px; color: #888; font-size: 28px; font-weight: bold; line-height: 1; }
-        .close-btn:hover { color: #fff; text-decoration: none; cursor: pointer; }
+        .modal-close-btn { position: absolute; top: 15px; right: 20px; color: #888; font-size: 28px; font-weight: bold; line-height: 1; cursor: pointer; border: none; background: none;}
+        .modal-close-btn:hover { color: #fff; background: none;}
 
         #printOnlyArea { display: none; }
         @media print {
             body { background-color: white !important; color: black !important; }
             body * { visibility: hidden; }
+            .slide-out-menu, .menu-backdrop { display: none !important; }
             #printOnlyArea, #printOnlyArea * { visibility: visible; }
             #printOnlyArea { display: block; position: absolute; left: 0; top: 0; width: 100%; padding: 20px; color: black; font-family: sans-serif; background: white; }
             .print-header { border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
@@ -145,11 +162,6 @@
             .print-issue-list { margin: 0; padding-left: 20px; color: black; }
             .print-issue-list li { margin-bottom: 5px; font-size: 1.1rem;}
             h1, h2, h3 { color: black !important; }
-        }
-        
-        @media (max-width: 768px) {
-            .service-layout { flex-direction: column; }
-            .service-sidebar { width: 100%; position: static; }
         }
     </style>
 </head>
@@ -159,10 +171,12 @@
     <div class="app-header">
         <div class="header-edge left"><button id="navHomeBtn" class="header-btn">🏠 Home</button></div>
         <h1>Pack Service Tracker</h1>
-        <div class="header-edge right"><button id="fullscreenBtn" class="header-btn secondary">🔲 Fullscreen</button></div>
+        <div class="header-edge right">
+            <button id="burgerMenuBtn" class="header-btn secondary" style="display:none;">☰ Menu</button>
+            <button id="fullscreenBtn" class="header-btn secondary">🔲 Full</button>
+        </div>
     </div>
 
-    <!-- 1. Setup / Home Section -->
     <div id="setupSection" class="app-section active">
         <label for="siteSelect">Select Site to Start Service:</label>
         <select id="siteSelect">
@@ -193,7 +207,6 @@
         <button class="btn-outline" id="toggleAdminBtn">⚙️ Manage Sites Database</button>
     </div>
 
-    <!-- 2. Admin Section -->
     <div id="adminSection" class="app-section">
         <h2>Manage Sites Database</h2>
         <div id="adminSiteList" style="margin-bottom: 30px;"><p>Loading sites...</p></div>
@@ -206,7 +219,6 @@
         <button class="btn-primary" id="saveSiteBtn">Save New Site</button>
     </div>
 
-    <!-- 3. General Checks Section -->
     <div id="generalChecksSection" class="app-section">
         <h2>General Site Checks</h2>
         <div id="generalPartsContainer" class="parts-grid"></div>
@@ -220,66 +232,65 @@
         </div>
     </div>
 
-    <!-- 4. Active Service (Packs) Section -->
     <div id="serviceSection" class="app-section">
-        <div class="service-layout">
-            
-            <div class="service-main">
-                <div class="progress-container">
-                    <div class="progress-fill" id="progressBarFill"></div>
-                </div>
-                <div class="pack-counter-text" id="packCounterText">Pack 1 of X</div>
-
-                <div class="grid-header">Pack Elements</div>
-                <div id="packPartsContainer" class="parts-grid"></div>
-
-                <div class="grid-header">Gun Elements</div>
-                <div id="gunPartsContainer" class="parts-grid"></div>
-                
-                <button class="btn-success" id="packAllOkBtn">✔ Mark Remaining Parts as "All Good"</button>
-
-                <div class="nav-controls">
-                    <button class="btn-primary" id="prevBtn" disabled>&laquo; Back</button>
-                    <div class="nav-status">
-                        <div class="save-indicator" id="saveIndicator">Cloud Synced ✓</div>
-                    </div>
-                    <button class="btn-primary" id="nextBtn">Next &raquo;</button>
-                </div>
+        <div class="service-main">
+            <div class="progress-container">
+                <div class="progress-fill" id="progressBarFill"></div>
             </div>
+            <div class="pack-counter-text" id="packCounterText">Pack 1 of X</div>
 
-            <div class="service-sidebar">
-                <div class="sidebar-title">Service Controls</div>
-                <button class="btn-outline" id="sidebarGeneralChecksBtn" style="background: white; color: var(--success); border-color: var(--success);">☑️ General Site Checks</button>
-                <button class="btn-outline" id="viewOverlayGridBtn">📊 View Grid Overlay</button>
-                <button class="btn-outline" id="sidebarPrintBtn">🖨️ Print Active Report</button>
-                
-                <div class="accordion-toggle" id="repAccordionToggle">
-                    <span>👤 Representative</span>
-                    <span id="repAccordionIcon">▼</span>
-                </div>
-                <div class="accordion-content" id="repAccordionContent">
-                    <input type="text" id="sidebarRepNameInput" placeholder="Enter your name..." style="margin-bottom: 10px;">
-                    <button class="btn-primary" id="saveRepNameBtn" style="padding: 10px; font-size: 1rem;">Save Name</button>
-                    <div id="sidebarRepMsg" style="text-align: center; font-weight: bold; font-size: 0.9rem;"></div>
-                </div>
+            <div class="grid-header">Pack Elements</div>
+            <div id="packPartsContainer" class="parts-grid"></div>
 
-                <div class="accordion-toggle" id="notesAccordionToggle">
-                    <span>📝 General Site Notes</span>
-                    <span id="accordionIcon">▼</span>
+            <div class="grid-header">Gun Elements</div>
+            <div id="gunPartsContainer" class="parts-grid"></div>
+            
+            <button class="btn-success" id="packAllOkBtn">✔ Mark Remaining Parts as "All Good"</button>
+
+            <div class="nav-controls">
+                <button class="btn-primary" id="prevBtn" disabled>&laquo; Back</button>
+                <div class="nav-status">
+                    <div class="save-indicator" id="saveIndicator">Cloud Synced ✓</div>
                 </div>
-                <div class="accordion-content" id="notesAccordionContent">
-                    <textarea id="sidebarSiteNotes" placeholder="Enter broad facility issues, missing packs, etc..."></textarea>
-                    <button class="btn-primary" id="saveSidebarNotesBtn" style="padding: 10px; font-size: 1rem;">Save Notes</button>
-                    <div id="sidebarNotesMsg" style="text-align: center; font-weight: bold; font-size: 0.9rem;"></div>
-                </div>
+                <button class="btn-primary" id="nextBtn">Next &raquo;</button>
             </div>
         </div>
     </div>
 </div>
 
+<div class="menu-backdrop" id="menuBackdrop"></div>
+<div class="slide-out-menu" id="slideOutMenu">
+    <button class="close-menu-btn" id="closeMenuBtn">&times;</button>
+    <div class="sidebar-title">Service Controls</div>
+    
+    <button class="btn-outline" id="sidebarGeneralChecksBtn" style="background: white; color: var(--success); border-color: var(--success);">☑️ General Site Checks</button>
+    <button class="btn-outline" id="viewOverlayGridBtn" style="background: white; color: #333; border-color: #333;">📊 View Grid Overlay</button>
+    <button class="btn-outline" id="sidebarPrintBtn" style="background: white; border-color: #333; color: #333;">🖨️ Print Active Report</button>
+    
+    <div class="accordion-toggle" id="repAccordionToggle">
+        <span>👤 Representative</span>
+        <span id="repAccordionIcon">▼</span>
+    </div>
+    <div class="accordion-content" id="repAccordionContent">
+        <input type="text" id="sidebarRepNameInput" placeholder="Enter your name..." style="margin-bottom: 10px;">
+        <button class="btn-primary" id="saveRepNameBtn" style="padding: 10px; font-size: 1rem;">Save Name</button>
+        <div id="sidebarRepMsg" style="text-align: center; font-weight: bold; font-size: 0.9rem;"></div>
+    </div>
+
+    <div class="accordion-toggle" id="notesAccordionToggle">
+        <span>📝 General Site Notes</span>
+        <span id="accordionIcon">▼</span>
+    </div>
+    <div class="accordion-content" id="notesAccordionContent">
+        <textarea id="sidebarSiteNotes" placeholder="Enter broad facility issues, missing packs, etc..."></textarea>
+        <button class="btn-primary" id="saveSidebarNotesBtn" style="padding: 10px; font-size: 1rem;">Save Notes</button>
+        <div id="sidebarNotesMsg" style="text-align: center; font-weight: bold; font-size: 0.9rem;"></div>
+    </div>
+</div>
+
 <div id="gridOverlayModal" class="modal">
     <div class="modal-content">
-        <span class="close-btn" id="closeModalBtn">&times;</span>
+        <button class="modal-close-btn" id="closeModalBtn">&times;</button>
         <h2 style="margin-top: 0;">Live Service Grid</h2>
         <div id="modalTableContainer" class="table-responsive">
             <p style="text-align: center;">Loading data...</p>
@@ -303,7 +314,7 @@
     let fetchedServiceDocs = []; 
     let isDirty = false;    
 
-    // Categorized Lists
+    // Categorized Lists (Includes User Additions)
     const generalChecksList = ["Chargers", "Batteries", "Racks", "PC", "Music", "HSDU", "Cables"];
     const packPartsList = ["Right Shoulder", "Left Shoulder", "Front", "Back"];
     const gunPartsList = ["Trigger", "Speaker", "Button Reader", "Screen", "Laser and IR", "Rattle", "Rubber Ring Present", "Screws Present", "Numbered Sticker"];
@@ -317,7 +328,27 @@
     const serviceTypeSelection = document.getElementById('serviceTypeSelection');
     const gridModal = document.getElementById('gridOverlayModal');
     
+    // Burger Menu Elements
+    const burgerBtn = document.getElementById('burgerMenuBtn');
+    const slideOutMenu = document.getElementById('slideOutMenu');
+    const menuBackdrop = document.getElementById('menuBackdrop');
+    const closeMenuBtn = document.getElementById('closeMenuBtn');
+
     // --- 0. MENU NAVIGATION & UTILITIES ---
+    function toggleMenu() {
+        const isOpen = slideOutMenu.classList.contains('open');
+        if (isOpen) {
+            slideOutMenu.classList.remove('open');
+            menuBackdrop.classList.remove('show');
+        } else {
+            slideOutMenu.classList.add('open');
+            menuBackdrop.classList.add('show');
+        }
+    }
+    burgerBtn.addEventListener('click', toggleMenu);
+    closeMenuBtn.addEventListener('click', toggleMenu);
+    menuBackdrop.addEventListener('click', toggleMenu);
+
     async function navigateTo(sectionId) {
         if (document.getElementById('generalChecksSection').classList.contains('active')) await saveGeneralChecks();
         if (document.getElementById('serviceSection').classList.contains('active')) await triggerBackgroundSave();
@@ -330,6 +361,15 @@
         document.getElementById('initialLoadGroup').style.display = 'flex';
         document.getElementById('dateSelectionUI').style.display = 'none';
         
+        // Only show Burger Menu inside active service areas
+        if (sectionId === 'serviceSection' || sectionId === 'generalChecksSection') {
+            burgerBtn.style.display = 'block';
+        } else {
+            burgerBtn.style.display = 'none';
+            slideOutMenu.classList.remove('open');
+            menuBackdrop.classList.remove('show');
+        }
+
         if(sectionId === 'adminSection') renderAdminList();
     }
 
@@ -340,10 +380,10 @@
     fullscreenBtn.addEventListener('click', () => {
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen().catch((err) => console.log(err));
-            fullscreenBtn.innerHTML = '🗗 Exit Fullscreen';
+            fullscreenBtn.innerHTML = '🗗 Exit Full';
         } else {
             document.exitFullscreen();
-            fullscreenBtn.innerHTML = '🔲 Fullscreen';
+            fullscreenBtn.innerHTML = '🔲 Full';
         }
     });
 
@@ -421,19 +461,17 @@
     });
 
     document.getElementById('startNewServiceBtn').addEventListener('click', async () => {
-        // Validation removed from start flow as per request
         currentpackIndex = 1;
         packDataCache = {}; 
         generalChecksCache = {};
         activeServiceDate = new Date().toISOString().split('T')[0]; 
         
         await loadSidebarNotes(); 
-        navigateTo('generalChecksSection');
-        renderGeneralChecksUI();
+        navigateTo('serviceSection'); // Defaulting to pack 1
+        renderpackUI();
     });
 
     document.getElementById('fetchDatesBtn').addEventListener('click', async () => {
-        // Validation removed from load flow as per request
         const msg = document.getElementById('loadStatusMsg');
         msg.innerText = "Finding historical dates..."; msg.style.color = "var(--primary)";
         document.getElementById('initialLoadGroup').style.display = 'none';
@@ -492,12 +530,13 @@
 
         currentpackIndex = 1;
         await loadSidebarNotes(); 
-        navigateTo('generalChecksSection');
-        renderGeneralChecksUI();
+        navigateTo('serviceSection'); // Defaulting to pack 1
+        renderpackUI();
     });
 
-    // --- 4. GENERAL CHECKS SECTION (Accessed from Sidebar) ---
+    // --- 4. GENERAL CHECKS SECTION (Accessed from Burger Menu) ---
     document.getElementById('sidebarGeneralChecksBtn').addEventListener('click', () => {
+        toggleMenu();
         navigateTo('generalChecksSection');
         renderGeneralChecksUI();
     });
@@ -556,22 +595,12 @@
         } catch (error) { document.getElementById('generalSaveIndicator').innerText = "Sync Failed"; }
     }
 
-    // --- 5. SIDEBAR ACCORDIONS & SETTINGS ---
-    document.getElementById('repAccordionToggle').addEventListener('click', () => {
-        const c = document.getElementById('repAccordionContent'); const i = document.getElementById('repAccordionIcon');
-        c.classList.toggle('open'); i.innerText = c.classList.contains('open') ? '▲' : '▼';
-    });
-
+    // --- 5. BURGER MENU ACCORDIONS & SETTINGS ---
     document.getElementById('saveRepNameBtn').addEventListener('click', () => {
         const repName = document.getElementById('sidebarRepNameInput').value.trim();
         const msg = document.getElementById('sidebarRepMsg');
         if(repName) { currentRepresentative = repName; localStorage.setItem('inspectorName', repName); msg.innerText = "Name Saved ✓"; msg.style.color = "var(--success)"; } 
         setTimeout(() => msg.innerText = "", 3000);
-    });
-
-    document.getElementById('notesAccordionToggle').addEventListener('click', () => {
-        const c = document.getElementById('notesAccordionContent'); const i = document.getElementById('accordionIcon');
-        c.classList.toggle('open'); i.innerText = c.classList.contains('open') ? '▲' : '▼';
     });
 
     async function loadSidebarNotes() {
@@ -592,8 +621,19 @@
         setTimeout(() => msg.innerText = "", 3000);
     });
 
+    // Accordion Toggle Handlers
+    document.getElementById('repAccordionToggle').addEventListener('click', () => {
+        const c = document.getElementById('repAccordionContent'); const i = document.getElementById('repAccordionIcon');
+        c.classList.toggle('open'); i.innerText = c.classList.contains('open') ? '▲' : '▼';
+    });
+    document.getElementById('notesAccordionToggle').addEventListener('click', () => {
+        const c = document.getElementById('notesAccordionContent'); const i = document.getElementById('accordionIcon');
+        c.classList.toggle('open'); i.innerText = c.classList.contains('open') ? '▲' : '▼';
+    });
+
     // --- 6. PRINT REPORT LOGIC ---
     document.getElementById('sidebarPrintBtn').addEventListener('click', async () => {
+        toggleMenu();
         await triggerBackgroundSave();
         const printArea = document.getElementById('printOnlyArea');
         const generalNotes = document.getElementById('sidebarSiteNotes').value || "None recorded.";
@@ -672,6 +712,7 @@
 
     // --- 7. GRID OVERLAY LOGIC ---
     document.getElementById('viewOverlayGridBtn').addEventListener('click', async () => {
+        toggleMenu();
         gridModal.style.display = "block";
         const containerElement = document.getElementById('modalTableContainer');
         containerElement.innerHTML = '<p style="text-align: center;">Fetching Live Data...</p>';
@@ -804,33 +845,42 @@
     }
 
     function renderpackUI() {
-        document.getElementById('packCounterText').innerText = `Pack ${currentpackIndex} of ${totalpacks}`;
-        document.getElementById('prevBtn').disabled = currentpackIndex === 1;
-        document.getElementById('nextBtn').innerText = currentpackIndex === totalpacks ? "Finish" : "Next \u00BB";
-        document.getElementById('progressBarFill').style.width = `${(currentpackIndex / totalpacks) * 100}%`;
-        document.getElementById('saveIndicator').innerText = "Cloud Synced ✓";
-        document.getElementById('saveIndicator').style.color = "#aaa";
-
-        if (!packDataCache[currentpackIndex]) {
-            packDataCache[currentpackIndex] = {};
-        }
-        allPackElements.forEach(part => {
-            if (!packDataCache[currentpackIndex][part]) {
-                packDataCache[currentpackIndex][part] = { status: null, notes: "" };
-            }
-        });
-
-        const currentData = packDataCache[currentpackIndex];
         const packContainer = document.getElementById('packPartsContainer');
         const gunContainer = document.getElementById('gunPartsContainer');
-        packContainer.innerHTML = '';
-        gunContainer.innerHTML = '';
+        
+        // CSS Transition handles the fade out
+        packContainer.style.opacity = '0';
+        gunContainer.style.opacity = '0';
 
-        packPartsList.forEach(part => packContainer.innerHTML += generatePartHTML(part, currentData[part], 'pack'));
-        gunPartsList.forEach(part => gunContainer.innerHTML += generatePartHTML(part, currentData[part], 'pack'));
+        setTimeout(() => {
+            document.getElementById('packCounterText').innerText = `Pack ${currentpackIndex} of ${totalpacks}`;
+            document.getElementById('prevBtn').disabled = currentpackIndex === 1;
+            document.getElementById('nextBtn').innerText = currentpackIndex === totalpacks ? "Finish" : "Next \u00BB";
+            document.getElementById('progressBarFill').style.width = `${(currentpackIndex / totalpacks) * 100}%`;
+            document.getElementById('saveIndicator').innerText = "Cloud Synced ✓";
+            document.getElementById('saveIndicator').style.color = "#aaa";
 
-        attachInteractionListeners(packContainer);
-        attachInteractionListeners(gunContainer);
+            if (!packDataCache[currentpackIndex]) packDataCache[currentpackIndex] = {};
+            allPackElements.forEach(part => {
+                if (!packDataCache[currentpackIndex][part]) packDataCache[currentpackIndex][part] = { status: null, notes: "" };
+            });
+
+            const currentData = packDataCache[currentpackIndex];
+            packContainer.innerHTML = '';
+            gunContainer.innerHTML = '';
+
+            packPartsList.forEach(part => packContainer.innerHTML += generatePartHTML(part, currentData[part], 'pack'));
+            gunPartsList.forEach(part => gunContainer.innerHTML += generatePartHTML(part, currentData[part], 'pack'));
+
+            attachInteractionListeners(packContainer);
+            attachInteractionListeners(gunContainer);
+            
+            // Allow DOM to update before fading in
+            requestAnimationFrame(() => {
+                packContainer.style.opacity = '1';
+                gunContainer.style.opacity = '1';
+            });
+        }, 200); 
     }
 
     function attachInteractionListeners(container) {
